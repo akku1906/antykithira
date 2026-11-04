@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mechanizm z Antykithiry</title>
+<meta name="description" content="Interaktywny model Mechanizmu z Antykithiry: kręć korbą, a tarcze poruszają się zgodnie z prawdziwymi przełożeniami.">
+<meta name="theme-color" content="#1b140d">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <h1>Mechanizm z Antykithiry</h1>
+  <nav class="tabs" role="tablist" aria-label="Widoki">
+    <button role="tab" data-view="front" aria-selected="true" title="Przód (1)">Przód</button>
+    <button role="tab" data-view="back" aria-selected="false" title="Tył (2)">Tył</button>
+    <button role="tab" data-view="inside" aria-selected="false" title="Wnętrze (3)">Wnętrze</button>
+    <button role="tab" data-view="about" aria-selected="false" title="Co to jest? (4)">Co to jest?</button>
+  </nav>
+  <button id="theme" class="icon-btn" title="Tryb jasny / ciemny (D)" aria-label="Przełącz tryb jasny/ciemny">◐</button>
+</header>
+
+<main>
+  <section class="stage" id="stage">
+    <canvas id="cv" aria-label="Tarcze mechanizmu – przeciągnij, aby kręcić korbą"></canvas>
+    <p class="hint">Przeciągnij po tarczy w kółko, aby kręcić korbą · jeden obrót = jeden rok</p>
+  </section>
+
+  <article class="about" id="about" hidden>
+    <h2>Co to jest?</h2>
+    <p>W 1901 roku nurkowie poławiający gąbki wydobyli z wraku statku zatopionego około 60 roku p.n.e. u wybrzeży wyspy Antykithira skorodowaną bryłę brązu i drewna. Dziś to 82 fragmenty z około trzydziestoma zachowanymi kołami zębatymi; przechowuje je Narodowe Muzeum Archeologiczne w Atenach.</p>
+    <p>Wiemy, że było to ręczne urządzenie astronomiczne: obrót korby przesuwał wskazówki Słońca i Księżyca po zodiaku i kalendarzu egipskim, kulka pokazywała fazę Księżyca, a mechanizm pin-and-slot odtwarzał nierównomierny ruch Księżyca według teorii Hipparcha. Z tyłu dwie spirale liczyły miesiące cyklu Metona (19 lat) i sarosu (223 miesiące), na którym zaznaczono przewidywane zaćmienia, a mała tarcza pokazywała czteroletni cykl igrzysk panhelleńskich.</p>
+    <p>Nie wiemy, kto i gdzie go zbudował, kiedy dokładnie powstał ani jak wyglądał przód z planetami — ta część jest w większości stracona i jej obraz pochodzi z rekonstrukcji opartych na inskrypcjach. Data startu 205 p.n.e. to hipoteza Carmana i Evansa (2014) oparta na wzorze zaćmień; inni badacze datują budowę na koniec II wieku p.n.e.</p>
+    <p>Pierwszą poważną analizę przeprowadził Derek de Solla Price („Gears from the Greeks”, 1974), opierając się na zdjęciach rentgenowskich. Michael Wright odczytał m.in. spiralę Metona i zaproponował mechanizm planetarny. Zespół Tony’ego Freetha dzięki tomografii komputerowej z 2005 roku rozszyfrował tył (Nature 2006, 2008), a w 2021 roku zaproponował pełny model kosmosu z planetami (Scientific Reports 11:5821), z którego pochodzą przełożenia planet w tym modelu.</p>
+    <p>Ten model jest uproszczeniem: przełożenia kół są wierne rekonstrukcjom, ale wygląd, położenia początkowe i rozmieszczenie zaćmień zostały wyliczone współcześnie. Szczegóły w README projektu.</p>
+  </article>
+
+  <aside class="panel" id="panel" aria-live="polite">
+    <div class="dates">
+      <div class="big" id="d-julian">—</div>
+      <div id="d-greg" class="sub"></div>
+      <div id="d-egypt" class="sub"></div>
+    </div>
+    <dl id="readout"></dl>
+  </aside>
+</main>
+
+<footer class="controls" aria-label="Sterowanie czasem">
+  <div class="row">
+    <button data-step="-365.25" title="−1 rok (PageDown)">−rok</button>
+    <button data-step="-29.53" title="−1 miesiąc (↓)">−mies.</button>
+    <button data-step="-1" title="−1 dzień (←)">−dzień</button>
+    <button id="play" title="Start / stop (spacja)" aria-label="Start lub stop">▶</button>
+    <button data-step="1" title="+1 dzień (→)">+dzień</button>
+    <button data-step="29.53" title="+1 miesiąc (↑)">+mies.</button>
+    <button data-step="365.25" title="+1 rok (PageUp)">+rok</button>
+  </div>
+  <div class="row">
+    <input type="range" id="slider" aria-label="Rok" step="any">
+    <select id="speed" aria-label="Prędkość odtwarzania" title="Prędkość odtwarzania">
+      <option value="1">1 dzień/s</option>
+      <option value="7">1 tydzień/s</option>
+      <option value="30" selected>1 miesiąc/s</option>
+      <option value="365.25">1 rok/s</option>
+      <option value="6585">1 saros/s</option>
+    </select>
+    <button id="today" title="Dzisiaj (T)">Dzisiaj</button>
+    <button id="start" title="Start mechanizmu – 205 p.n.e. (S)">205 p.n.e.</button>
+  </div>
+</footer>
+
+<script src="js/engine.js"></script>
+<script src="js/draw.js"></script>
+<script src="js/front.js"></script>
+<script src="js/back.js"></script>
+<script src="js/inside.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

@@ -223,12 +223,33 @@
     const umbral = (1.0128 - u - Math.abs(gamma)) / 0.5450;   // wielkość cieniowa
     return umbral > 0 ? { type: 'L', gamma, mag: umbral } : null;
   }
-  // glify dla 223 komórek sarosu zaczynającego się od nowiu K_START
+  // ---------- glify sarosu ----------
+  // Rozkład: „Eclipse Year Model” (Freeth 2014, PLOS ONE 9:e103275). Miesiąc = 38 EYu, rok zaćmieniowy = 446 EYu;
+  // pełnia n-tego miesiąca w 38(n−1)+17, nów w 38(n−1)+36 (mod 446); punkty węzłowe: zstępujący 66, wstępujący 289.
+  // Glif Σ: pełnia ≤ 20 EYu od punktu węzłowego (bez drugiego Σ w kolejnym miesiącu);
+  // glif Η: nów ≤ 20 EYu na północ albo ≤ 7 EYu na południe od punktu węzłowego. Wynik: 51 glifów (38 Σ, 28 Η).
+  function eymNode(p) {
+    let best = null;
+    for (const k of [-1, 0, 1]) for (const [np, kind] of [[66, 'D'], [289, 'A']]) {
+      const d = p - (np + 446 * k);
+      if (!best || Math.abs(d) < Math.abs(best.d)) best = { d, kind };
+    }
+    return { dist: Math.abs(best.d), north: best.kind === 'D' ? best.d < 0 : best.d > 0 };
+  }
+  // Glify odczytane z fragmentów: Freeth i in. 2008, materiały uzupełniające, ryc. S16.
+  const OBSERVED_GLYPHS = { 13: 'S', 20: 'L', 25: 'S', 26: 'L', 67: 'L', 72: 'S', 78: 'S', 79: 'L', 114: 'L', 119: 'S', 120: 'L',
+    125: 'LS', 131: 'LS', 137: 'LS', 172: 'LS', 178: 'LS', 184: 'LS', 190: 'L' };
   const SAROS_GLYPHS = (function () {
     const out = [];
-    for (let i = 0; i < 223; i++) {
-      const s = eclipseAt(K_START + i), l = eclipseAt(K_START + i + 0.5);
-      out.push({ solar: !!s, lunar: !!l });
+    let prevL = false;
+    for (let n = 1; n <= 223; n++) {
+      const fm = eymNode((38 * (n - 1) + 17) % 446), nm = eymNode((38 * (n - 1) + 36) % 446);
+      const lunar = fm.dist <= 20 && !prevL;
+      const solar = nm.dist <= (nm.north ? 20 : 7);
+      prevL = lunar;
+      // dla porównania: czy w tej lunacji było zaćmienie według współczesnego modelu (Meeus)
+      const ms = eclipseAt(K_START + n), ml = eclipseAt(K_START + n - 1 + 0.5);   // miesiąc od sierpu: pełnia w środku, nów na końcu
+      out.push({ lunar, solar, observed: n in OBSERVED_GLYPHS, meeus: { solar: !!ms, lunar: !!ml } });
     }
     return out;
   })();
@@ -300,7 +321,7 @@
     F, fmul, fdiv, fsub, fstr, Y, MONTH, GEARS, G, PLANETS, NODES,
     R_SIDEREAL, R_APSIDES, R_ANOMALY, R_SYNODIC,
     jdFromCal, calFromJd, egyptian, EG_MONTHS, EG_MONTHS_PL, EG_EPOCH,
-    JD_START, K_START, meanNewMoon, kNear, eclipseAt, SAROS_GLYPHS, METONIC_CELLS, EXCLUDED, GAMES, GAMES_PL, GAMES_UNCERTAIN,
+    JD_START, K_START, meanNewMoon, kNear, eclipseAt, SAROS_GLYPHS, OBSERVED_GLYPHS, METONIC_CELLS, EXCLUDED, GAMES, GAMES_PL, GAMES_UNCERTAIN,
     state, jdNow, pinSlot, E_MOON, E_SUN, norm
   };
 });

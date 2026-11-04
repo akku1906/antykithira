@@ -83,7 +83,16 @@ ok(AM.eclipseAt(kS) && AM.eclipseAt(kS).type === 'S', 'zaćmienie Słońca 8 IV 
 ok(!AM.eclipseAt(kS + 1), 'nów 8 V 2024 – brak zaćmienia');
 const kL = AM.kNear(AM.jdFromCal(2022, 10, 25, true));
 ok(AM.eclipseAt(kL + 0.5) && AM.eclipseAt(kL + 0.5).type === 'L', 'zaćmienie Księżyca 8 XI 2022 wykryte');
-const nS = AM.SAROS_GLYPHS.filter((g) => g.solar).length, nL = AM.SAROS_GLYPHS.filter((g) => g.lunar).length;
+console.log('4b. Glify sarosu (Freeth 2014, EYM) i odczyty z fragmentów (Freeth 2008, ryc. S16)');
+const SG = AM.SAROS_GLYPHS;
+const nG = SG.filter((g) => g.lunar || g.solar).length, nGL = SG.filter((g) => g.lunar).length, nGS = SG.filter((g) => g.solar).length;
+ok(nG === 51 && nGL === 38 && nGS === 28, `EYM: ${nG} glifów, ${nGL} Σ, ${nGS} Η (artykuł: 51, 38, 28)`);
+const mism = Object.entries(AM.OBSERVED_GLYPHS).filter(([n, t]) => (SG[n - 1].lunar ? 'L' : '') + (SG[n - 1].solar ? 'S' : '') !== t);
+ok(mism.length === 0, `wszystkie ${Object.keys(AM.OBSERVED_GLYPHS).length} odczytane glify zgodne z EYM` + (mism.length ? ' – niezgodne: ' + mism.map((m) => m[0]).join(',') : ''));
+ok(SG[148].lunar && SG[148].solar, 'glif 149 = Σ+Η (jedyna różnica względem modelu z 2008)');
+const agree = SG.filter((g) => (g.lunar || g.solar) && (g.lunar ? g.meeus.lunar || !g.lunar : true) && (g.solar ? g.meeus.solar : true)).length;
+console.log(`       zgodność z Meeusem (lunacje od 28 IV 205 p.n.e.): ${agree}/51 glifów potwierdzonych w całości`);
+const nS = AM.SAROS_GLYPHS.filter((g) => g.meeus.solar).length, nL = AM.SAROS_GLYPHS.filter((g) => g.meeus.lunar).length;
 ok(nS >= 35 && nS <= 48 && nL >= 20 && nL <= 34, `saros od 205 p.n.e.: ${nS} zaćmień Słońca, ${nL} Księżyca (cieniowych)`);
 
 console.log(`\n${pass} ok, ${fail} błędów`);

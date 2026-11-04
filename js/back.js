@@ -34,19 +34,26 @@
     for (let i = 0; i <= g.cells; i++) {
       const th = g.thOf(i);
       const [x1, y1] = g.pt(rb(th), th), [x2, y2] = g.pt(rb(th) + pitch, th);
+      ctx.strokeStyle = P.dark; ctx.lineWidth = 0.6;
       ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
       if (i === g.cells) break;
       const thc = g.thOf(i + 0.5), rc = rb(thc) + pitch / 2;
       const w = 2 * Math.PI * rc / g.perTurn;
       const gl = glyphFn && glyphFn(i);
       if (gl) {
+        // odczytany z fragmentu: pełne czerwone pole; zrekonstruowany: sam kontur
         const [x, y] = g.pt(rc, thc);
         if (w > fs * 0.9) {
           ctx.save(); ctx.translate(x, y); ctx.rotate(D.ang(thc + g.s0) + Math.PI / 2);
-          ctx.font = `bold ${Math.min(pitch * 0.42, w * 0.8)}px Georgia, serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-          ctx.fillStyle = P.hi; ctx.fillText(gl, 0, 0); ctx.restore();
+          const bw = pitch * 0.62, bh = Math.min(w * 0.82, pitch * 0.5);
+          ctx.beginPath(); ctx.rect(-bw / 2, -bh / 2, bw, bh);
+          if (gl.observed) { ctx.fillStyle = P.hi; ctx.fill(); }
+          else { ctx.setLineDash([3, 2]); ctx.strokeStyle = P.hi; ctx.lineWidth = 1; ctx.stroke(); ctx.setLineDash([]); }
+          ctx.font = `bold ${Math.min(pitch * 0.36, bh * 0.85)}px Georgia, serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          ctx.fillStyle = gl.observed ? '#fff6e6' : P.hi; ctx.fillText(gl.txt, 0, 0); ctx.restore();
         } else {
-          ctx.beginPath(); ctx.arc(x, y, Math.max(1.5, w * 0.3), 0, 7); ctx.fillStyle = P.hi; ctx.fill();
+          ctx.beginPath(); ctx.arc(x, y, Math.max(1.8, w * 0.3), 0, 7);
+          if (gl.observed) { ctx.fillStyle = P.hi; ctx.fill(); } else { ctx.strokeStyle = P.hi; ctx.lineWidth = 1.2; ctx.stroke(); }
         }
       } else if (labelFn && w > fs * 0.55) {
         const txt = labelFn(i);
@@ -128,12 +135,13 @@
     // --- Saros: 223 miesiące w 4 zwojach ---
     const gs = spiralGeom(cx, cyS, R * 0.4, R, 4, 223);
     const gl = AM.SAROS_GLYPHS;
-    drawSpiral(ctx, gs, P, fs, null, (i) => (gl[i].lunar ? 'Σ' : '') + (gl[i].solar ? 'Η' : ''), st.saros.cell);
+    drawSpiral(ctx, gs, P, fs, null, (i) => (gl[i].lunar || gl[i].solar)
+      ? { txt: (gl[i].lunar ? 'Σ' : '') + (gl[i].solar ? 'Η' : ''), observed: gl[i].observed } : null, st.saros.cell);
     subDial(ctx, cx, cyS, R * 0.24, [['', '0 h'], ['Η', '+8 h'], ['Ις', '+16 h']], st.exeligmos.angle, P, fs, null);
     spiralPointer(ctx, gs, st.saros.pos, P, R);
     capt('ΣΑΡΟΣ · 223 miesiące · exeligmos', cyS + R + fs * 1.0);
     ctx.font = `${fs * 0.65}px Georgia, serif`; ctx.fillStyle = P.text; ctx.globalAlpha = 0.85;
-    ctx.fillText('Σ = zaćmienie Księżyca, Η = zaćmienie Słońca (model przybliżony)', cx, cyS + R + fs * 1.9);
+    ctx.fillText('Σ Księżyc, Η Słońce · pełne pole: odczytane z fragmentów · kontur: rekonstrukcja (Freeth 2014)', cx, cyS + R + fs * 1.9);
     ctx.globalAlpha = 1;
 
     D.crank(ctx, W - W * 0.06, H / 2, W * 0.035, st.crank, P);

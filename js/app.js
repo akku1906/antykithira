@@ -159,8 +159,10 @@
     const ph = st.phase, illum = Math.round(50 * (1 - Math.cos(ph * D.rad)));
     const phName = ph < 15 || ph > 345 ? 'nów' : ph < 165 ? 'przybywa' : ph < 195 ? 'pełnia' : 'ubywa';
     const m = st.metonic, sa = st.saros;
-    const gl = sa.glyph, glTxt = gl.solar || gl.lunar
-      ? `<span class="ecl">${[gl.lunar ? 'Σ zaćmienie Księżyca' : '', gl.solar ? 'Η zaćmienie Słońca' : ''].filter(Boolean).join(', ')}</span>` : 'brak zaćmienia';
+    const gl = sa.glyph, glTxt = (gl.solar || gl.lunar
+      ? `<span class="ecl">${[gl.lunar ? 'Σ zaćmienie Księżyca' : '', gl.solar ? 'Η zaćmienie Słońca' : ''].filter(Boolean).join(', ')}</span> <span class="gr">(${gl.observed ? 'odczytany z fragmentu' : 'rekonstrukcja Freetha 2014'})</span>`
+      : 'brak glifu') +
+      `<br><span class="gr">w rzeczywistości (Meeus, lunacja od 205 p.n.e.): ${[gl.meeus.lunar ? 'zaćm. Księżyca' : '', gl.meeus.solar ? 'zaćm. Słońca' : ''].filter(Boolean).join(', ') || 'brak'}</span>`;
     const rows = [
       ['<h3>Przód</h3>'],
       ['Słońce', `${deg(st.sunTrue)} <span class="gr">(średnie ${deg(st.sunMean)})</span>`],

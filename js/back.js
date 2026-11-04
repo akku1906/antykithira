@@ -4,11 +4,14 @@
   const D = window.D, AM = window.AM;
   const GREEK_NUM = ['Α', 'Β', 'Γ', 'Δ'];
 
-  function spiralGeom(cx, cy, rIn, rOut, turns, cells) {
+  // start: kąt (0 = góra) początku spirali; Meton zaczyna się na dole wewnątrz (Freeth i in. 2008)
+  function spiralGeom(cx, cy, rIn, rOut, turns, cells, start) {
     const pitch = (rOut - rIn) / (turns + 1);
     const rb = (th) => rIn + pitch * th / 360;           // wewnętrzna krawędź zwoju przy kącie th
     const perTurn = cells / turns;
-    return { cx, cy, pitch, rb, perTurn, turns, cells, thOf: (pos) => pos / perTurn * 360 };
+    const s0 = start || 0;
+    return { cx, cy, pitch, rb, perTurn, turns, cells, thOf: (pos) => pos / perTurn * 360,
+      pt: (r, th) => D.pt(cx, cy, r, th + s0), s0 };
   }
 
   function drawSpiral(ctx, g, P, fs, labelFn, glyphFn, currentCell) {
@@ -21,7 +24,7 @@
     // linia spirali
     ctx.beginPath();
     for (let th = 0; th <= (g.turns + 1) * 360; th += 2) {
-      const [x, y] = D.pt(cx, cy, rb(th), th);
+      const [x, y] = g.pt(rb(th), th);
       if (th === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
     }
     ctx.strokeStyle = P.dark; ctx.lineWidth = 1.3; ctx.stroke();
@@ -30,16 +33,16 @@
     const cellW = (2 * Math.PI * (rb(0) + pitch / 2)) / g.perTurn;   // najmniejsza szerokość
     for (let i = 0; i <= g.cells; i++) {
       const th = g.thOf(i);
-      const [x1, y1] = D.pt(cx, cy, rb(th), th), [x2, y2] = D.pt(cx, cy, rb(th) + pitch, th);
+      const [x1, y1] = g.pt(rb(th), th), [x2, y2] = g.pt(rb(th) + pitch, th);
       ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
       if (i === g.cells) break;
       const thc = g.thOf(i + 0.5), rc = rb(thc) + pitch / 2;
       const w = 2 * Math.PI * rc / g.perTurn;
       const gl = glyphFn && glyphFn(i);
       if (gl) {
-        const [x, y] = D.pt(cx, cy, rc, thc);
+        const [x, y] = g.pt(rc, thc);
         if (w > fs * 0.9) {
-          ctx.save(); ctx.translate(x, y); ctx.rotate(D.ang(thc) + Math.PI / 2);
+          ctx.save(); ctx.translate(x, y); ctx.rotate(D.ang(thc + g.s0) + Math.PI / 2);
           ctx.font = `bold ${Math.min(pitch * 0.42, w * 0.8)}px Georgia, serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
           ctx.fillStyle = P.hi; ctx.fillText(gl, 0, 0); ctx.restore();
         } else {
@@ -47,8 +50,8 @@
         }
       } else if (labelFn && w > fs * 0.55) {
         const txt = labelFn(i);
-        const [x, y] = D.pt(cx, cy, rc, thc);
-        ctx.save(); ctx.translate(x, y); ctx.rotate(D.ang(thc));
+        const [x, y] = g.pt(rc, thc);
+        ctx.save(); ctx.translate(x, y); ctx.rotate(D.ang(thc + g.s0));
         ctx.font = `${Math.min(pitch * 0.2, w * 0.62)}px Georgia, serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
         ctx.fillStyle = P.text; ctx.globalAlpha = 0.85; ctx.fillText(txt, 0, 0); ctx.restore();
       }
@@ -59,16 +62,16 @@
     const { cx, cy, rb, pitch } = g;
     const a0 = g.thOf(i), a1 = g.thOf(i + 1);
     ctx.beginPath();
-    for (let th = a0; th <= a1 + 1e-9; th += (a1 - a0) / 8) { const [x, y] = D.pt(cx, cy, rb(th), th); ctx.lineTo(x, y); }
-    for (let th = a1; th >= a0 - 1e-9; th -= (a1 - a0) / 8) { const [x, y] = D.pt(cx, cy, rb(th) + pitch, th); ctx.lineTo(x, y); }
+    for (let th = a0; th <= a1 + 1e-9; th += (a1 - a0) / 8) { const [x, y] = g.pt(rb(th), th); ctx.lineTo(x, y); }
+    for (let th = a1; th >= a0 - 1e-9; th -= (a1 - a0) / 8) { const [x, y] = g.pt(rb(th) + pitch, th); ctx.lineTo(x, y); }
     ctx.closePath();
   }
   // wskazówka ze ślizgaczem: ramię od środka, ślizgacz w bieżącym zwoju
   function spiralPointer(ctx, g, pos, P, R) {
     const th = g.thOf(pos);
     const rS = g.rb(th) + g.pitch / 2;
-    D.pointer(ctx, g.cx, g.cy, th, 0, g.rb(g.turns * 360) + g.pitch * 1.05, P.brass, P.dark, Math.max(2, R * 0.022));
-    const [x, y] = D.pt(g.cx, g.cy, rS, th);
+    D.pointer(ctx, g.cx, g.cy, th + g.s0, 0, g.rb(g.turns * 360) + g.pitch * 1.05, P.brass, P.dark, Math.max(2, R * 0.022));
+    const [x, y] = g.pt(rS, th);
     ctx.beginPath(); ctx.arc(x, y, g.pitch * 0.32, 0, 2 * Math.PI);
     ctx.fillStyle = P.brass2; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = P.dark; ctx.stroke();
     ctx.beginPath(); ctx.arc(x, y, g.pitch * 0.12, 0, 2 * Math.PI); ctx.fillStyle = P.dark; ctx.fill();
@@ -106,9 +109,17 @@
     const capt = (t, y) => { ctx.font = `${fs * 0.85}px Georgia, serif`; ctx.textAlign = 'center'; ctx.fillStyle = P.text; ctx.fillText(t, cx, y); };
 
     // --- Meton: 235 miesięcy w 5 zwojach ---
-    const gm = spiralGeom(cx, cyM, R * 0.42, R, 5, 235);
+    const gm = spiralGeom(cx, cyM, R * 0.42, R, 5, 235, 180);
     const cells = AM.METONIC_CELLS;
-    drawSpiral(ctx, gm, P, fs, (i) => cells[i].name.slice(0, 4), null, st.metonic.cell);
+    drawSpiral(ctx, gm, P, fs, (i) => cells[i].first ? 'L' + cells[i].yearGr : cells[i].name.slice(0, 4), null, st.metonic.cell);
+    // numery dni opuszczonych wpisane pod pierwszym zwojem (jak na fragmencie B)
+    ctx.font = `${Math.max(7, gm.pitch * 0.26)}px Georgia, serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = P.text;
+    for (let i = 0; i < 47; i++) {
+      const ex = cells[i].exDay; if (!ex) continue;
+      const th = gm.thOf(i + 0.5), [x, y] = gm.pt(gm.rb(th) - gm.pitch * 0.22, th);
+      ctx.fillText(String(ex), x, y);
+    }
     subDial(ctx, cx - R * 0.205, cyM, R * 0.19, AM.GAMES.map((g, i) => g.map((n, k) => n + (AM.GAMES_UNCERTAIN[i][k] ? '?' : ''))), st.games.angle, P, fs * 0.8, 'igrzyska');
     subDial(ctx, cx + R * 0.205, cyM, R * 0.19, GREEK_NUM, st.callippic.angle, P, fs, 'Kalippos');
     spiralPointer(ctx, gm, st.metonic.pos, P, R);

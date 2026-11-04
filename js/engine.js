@@ -162,17 +162,36 @@
     'ΑΡΤΕΜΙΣΙΟΣ', 'ΨΥΔΡΕΥΣ', 'ΓΑΜΕΙΛΙΟΣ', 'ΑΓΡΙΑΝΙΟΣ', 'ΠΑΝΑΜΟΣ', 'ΑΠΕΛΛΑΙΟΣ'];
   const META_MONTHS_PL = ['Phoinikaios', 'Kraneios', 'Lanotropios', 'Machaneus', 'Dodekateus', 'Eukleios',
     'Artemisios', 'Psydreus', 'Gameilios', 'Agrianios', 'Panamos', 'Apellaios'];
-  // Lata przestępne (13 miesięcy) – standardowy schemat Metona; rozkład na mechanizmie jest inny i niepewny.
-  const LEAP = new Set([3, 6, 8, 11, 14, 17, 19]);
+  // Struktura kalendarza według Freeth i in. 2008, materiały uzupełniające §3.3 i ryc. S10:
+  // lata 13-miesięczne 1, 3, 6, 9, 11, 14, 17 (wywnioskowane z inskrypcji, „bardzo prawdopodobne”);
+  // powtarzany miesiąc 6 (Eukleios) – jedna z możliwych hipotez autorów;
+  // dni opuszczone (exairesimoi): w każdym zwoju (47 miesięcy po nominalnie 30 dni) 22 dni co 64 dni,
+  // z dwoma odstępami 65-dniowymi – rozkład identyczny w pięciu zwojach (ryc. S10).
+  const LEAP = new Set([1, 3, 6, 9, 11, 14, 17]);
+  const LEAP_MONTH = 5;                                   // indeks Eukleiosa
+  const IONIC = ['Α', 'Β', 'Γ', 'Δ', 'Ε', 'Ϛ', 'Ζ', 'Η', 'Θ', 'Ι', 'ΙΑ', 'ΙΒ', 'ΙΓ', 'ΙΔ', 'ΙΕ', 'ΙϚ', 'ΙΖ', 'ΙΗ', 'ΙΘ'];
+  const EXCLUDED = (function () {                         // nominalne dni opuszczone w zwoju (0 = 1. dzień komórki 1)
+    const out = [0]; let d = 0;
+    for (let k = 1; k < 22; k++) { d += (k === 6 || k === 17) ? 65 : 64; out.push(d); }
+    return out;                                           // ostatni + 64 = 1410 = początek kolejnego zwoju
+  })();
   const METONIC_CELLS = (function () {
     const cells = [];
     for (let yr = 1; yr <= 19; yr++) {
       const n = LEAP.has(yr) ? 13 : 12;
       for (let i = 0; i < n; i++) {
-        const idx = i < 12 ? i : 11;                      // miesiąc przestępny = powtórzony ostatni
-        cells.push({ year: yr, name: META_MONTHS[idx], namePl: META_MONTHS_PL[idx] + (i === 12 ? ' II' : ''), leap: i === 12 });
+        const idx = LEAP.has(yr) && i > LEAP_MONTH ? i - 1 : i;
+        const leap = LEAP.has(yr) && i === LEAP_MONTH + 1;
+        cells.push({ year: yr, yearGr: IONIC[yr - 1], first: i === 0, name: META_MONTHS[idx],
+          namePl: META_MONTHS_PL[idx] + (leap ? ' II (przestępny)' : ''), leap });
       }
     }
+    cells.forEach((c, i) => {
+      const c0 = (i % 47) * 30;
+      const ex = EXCLUDED.find((e) => e >= c0 && e < c0 + 30);
+      c.exDay = ex === undefined ? null : ex - c0 + 1;
+      c.days = ex === undefined ? 30 : 29;
+    });
     return cells;                                         // 235
   })();
   // Tarcza igrzysk: dwie nazwy na rok. Pięć nazw – Freeth i in. 2008 (Nature 454:614);
@@ -281,7 +300,7 @@
     F, fmul, fdiv, fsub, fstr, Y, MONTH, GEARS, G, PLANETS, NODES,
     R_SIDEREAL, R_APSIDES, R_ANOMALY, R_SYNODIC,
     jdFromCal, calFromJd, egyptian, EG_MONTHS, EG_MONTHS_PL, EG_EPOCH,
-    JD_START, K_START, meanNewMoon, kNear, eclipseAt, SAROS_GLYPHS, METONIC_CELLS, GAMES, GAMES_PL, GAMES_UNCERTAIN,
+    JD_START, K_START, meanNewMoon, kNear, eclipseAt, SAROS_GLYPHS, METONIC_CELLS, EXCLUDED, GAMES, GAMES_PL, GAMES_UNCERTAIN,
     state, jdNow, pinSlot, E_MOON, E_SUN, norm
   };
 });

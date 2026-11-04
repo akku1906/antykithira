@@ -1,5 +1,5 @@
 // Prosty service worker: najpierw pamięć podręczna, w tle odświeżenie.
-const CACHE = 'antykithira-v2';
+const CACHE = 'antykithira-v3';
 const ASSETS = ['./', 'index.html', 'style.css', 'manifest.webmanifest', 'icon.svg',
   'js/engine.js', 'js/draw.js', 'js/front.js', 'js/back.js', 'js/inside.js', 'js/app.js'];
 self.addEventListener('install', (e) => {

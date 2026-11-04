@@ -55,7 +55,7 @@
           ctx.beginPath(); ctx.arc(x, y, Math.max(1.8, w * 0.3), 0, 7);
           if (gl.observed) { ctx.fillStyle = P.hi; ctx.fill(); } else { ctx.strokeStyle = P.hi; ctx.lineWidth = 1.2; ctx.stroke(); }
         }
-      } else if (labelFn && w > fs * 0.55) {
+      } else if (labelFn && Math.min(pitch * 0.2, w * 0.62) >= 6) {
         const txt = labelFn(i);
         const [x, y] = g.pt(rc, thc);
         ctx.save(); ctx.translate(x, y); ctx.rotate(D.ang(thc + g.s0));
@@ -93,7 +93,8 @@
       const a = i * 360 / n;
       const [x1, y1] = D.pt(x, y, r * 0.2, a), [x2, y2] = D.pt(x, y, r, a);
       ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
-      const lines = [].concat(labels[i]);
+      let lines = [].concat(labels[i]);
+      if (lines.length > 1 && fs * 0.62 < 7) lines = [GREEK_NUM[i] || lines[0]];   // na małym ekranie tylko numer roku
       lines.forEach((t, k) => D.arcText(ctx, t, x, y, r * (0.78 - k * 0.22), a + 180 / n, fs * (k ? 0.62 : 0.72), P.text));
     }
     D.pointer(ctx, x, y, angle, 0, r * 0.95, P.dark, P.brass, Math.max(1.5, r * 0.04));
@@ -113,7 +114,7 @@
     ctx.strokeStyle = P.dark; ctx.lineWidth = 1.5; ctx.stroke();
 
     const cyM = H * 0.262, cyS = H * 0.728;
-    const capt = (t, y) => { ctx.font = `${fs * 0.85}px Georgia, serif`; ctx.textAlign = 'center'; ctx.fillStyle = P.text; ctx.fillText(t, cx, y); };
+    const capt = (t, y) => { ctx.font = `${Math.max(10, fs * 0.85)}px Georgia, serif`; ctx.textAlign = 'center'; ctx.fillStyle = P.text; ctx.fillText(t, cx, y); };
 
     // --- Meton: 235 miesięcy w 5 zwojach ---
     const gm = spiralGeom(cx, cyM, R * 0.42, R, 5, 235, 180);
@@ -140,8 +141,14 @@
     subDial(ctx, cx, cyS, R * 0.24, [['', '0 h'], ['Η', '+8 h'], ['Ις', '+16 h']], st.exeligmos.angle, P, fs, null);
     spiralPointer(ctx, gs, st.saros.pos, P, R);
     capt('ΣΑΡΟΣ · 223 miesiące · exeligmos', cyS + R + fs * 1.0);
-    ctx.font = `${fs * 0.65}px Georgia, serif`; ctx.fillStyle = P.text; ctx.globalAlpha = 0.85;
-    ctx.fillText('Σ Księżyc, Η Słońce · pełne pole: odczytane z fragmentów · kontur: rekonstrukcja (Freeth 2014)', cx, cyS + R + fs * 1.9);
+    const lf = Math.max(9, fs * 0.65);
+    ctx.font = `${lf}px Georgia, serif`; ctx.fillStyle = P.text; ctx.globalAlpha = 0.85;
+    const leg = 'Σ Księżyc, Η Słońce · pełne pole: odczytane z fragmentów · kontur: rekonstrukcja (Freeth 2014)';
+    if (ctx.measureText(leg).width < W * 0.92) ctx.fillText(leg, cx, cyS + R + fs * 1.9);
+    else {
+      ctx.fillText('Σ Księżyc, Η Słońce · pełne pole: odczytane z fragmentów', cx, cyS + R + fs * 1.0 + lf * 1.4);
+      ctx.fillText('kontur: rekonstrukcja (Freeth 2014)', cx, cyS + R + fs * 1.0 + lf * 2.6);
+    }
     ctx.globalAlpha = 1;
 
     D.crank(ctx, W - W * 0.06, H / 2, W * 0.035, st.crank, P);

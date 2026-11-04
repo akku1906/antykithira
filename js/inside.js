@@ -38,7 +38,8 @@
   function draw(ctx, W, H, st, P) {
     ctx.fillStyle = D.metal(ctx, W / 2, H / 2, W * 0.8, D.shade(P.plate2, -0.2), D.shade(P.plate2, -0.5));
     D.roundRect(ctx, 2, 2, W - 4, H - 4, W * 0.03); ctx.fill();
-    const legendH = Math.max(70, H * 0.17);
+    const narrow = W < 640;
+    const legendH = narrow ? Math.max(110, H * 0.3) : Math.max(70, H * 0.17);
     const box = POS._box, bw = box.x1 - box.x0, bh = box.y1 - box.y0;
     const pad = W * 0.04;
     const k = Math.min((W - 2 * pad) / bw, (H - legendH - 2 * pad) / bh);
@@ -81,7 +82,7 @@
     for (const id of ids) {
       const g = AM.G[id], [x, y] = X(POS[id]), r = rOf(g.z) * k;
       ctx.font = `bold ${fs}px Georgia, serif`;
-      const t1 = `${id} · ${g.z}`;
+      const t1 = narrow ? id : `${id} · ${g.z}`;
       const ty = y + r * 0.45;
       ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(20,12,4,.8)'; ctx.strokeText(t1, x, ty);
       ctx.fillStyle = '#fff3d6'; ctx.fillText(t1, x, ty);
@@ -97,11 +98,11 @@
     ctx.fillText('Przekładnie planetarne na b1 (Freeth i in. 2021) – cykle synodyczne / lata:', lx, ly);
     ctx.font = `${lfs}px Georgia, serif`; ctx.fillStyle = '#f3e6cc';
     const items = AM.PLANETS.map((p) => `${p.pl} ${AM.fstr(p.syn)}: ${p.train}`).concat([`Smok (węzły) −5/93: ${AM.NODES.train}`]);
-    const colW = (W - 2 * pad) / 2;
-    items.forEach((t, i) => ctx.fillText(t, lx + (i % 2) * colW, ly + lfs * 1.5 * (1 + Math.floor(i / 2))));
+    const cols = narrow ? 1 : 2, colW = (W - 2 * pad) / cols;
+    items.forEach((t, i) => ctx.fillText(t, lx + (i % cols) * colW, ly + lfs * 1.45 * (1 + Math.floor(i / cols))));
     return { cx: W / 2, cy: H / 2 };
   }
 
   window.Views = window.Views || {};
-  window.Views.inside = { draw, aspect: 1.05 };
+  window.Views.inside = { draw, aspect: (w) => (w < 640 ? 0.78 : 1.05) };
 })();

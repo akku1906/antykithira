@@ -113,7 +113,7 @@
     const controlsH = document.querySelector('.controls').offsetHeight;
     const headerH = document.querySelector('.top').offsetHeight;
     const availH = Math.max(300, window.innerHeight - controlsH - headerH - 50);
-    const aspect = V.aspect;  // szer./wys.
+    const aspect = typeof V.aspect === 'function' ? V.aspect(availW) : V.aspect;  // szer./wys.
     let w = Math.min(availW, availH * aspect), h = w / aspect;
     if (window.innerWidth <= 860) { w = availW; h = w / aspect; }
     W = Math.floor(w); H = Math.floor(h);

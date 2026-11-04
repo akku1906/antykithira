@@ -69,7 +69,12 @@
   // ---------- motyw ----------
   function applyTheme(t) {
     if (t) document.documentElement.setAttribute('data-theme', t); else document.documentElement.removeAttribute('data-theme');
-    palette = D.palette(); dirty = true;
+    palette = D.palette(); dirty = true; themeIcon();
+  }
+  function themeIcon() {
+    const dark = (document.documentElement.getAttribute('data-theme') ||
+      (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')) === 'dark';
+    $('#theme').textContent = dark ? '☀' : '☾';
   }
   $('#theme').addEventListener('click', () => {
     const cur = document.documentElement.getAttribute('data-theme') ||
@@ -77,11 +82,11 @@
     const next = cur === 'dark' ? 'light' : 'dark';
     store.set('am-theme', next); applyTheme(next);
   });
-  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { palette = D.palette(); dirty = true; });
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { palette = D.palette(); dirty = true; themeIcon(); });
 
   // ---------- klawiatura ----------
   document.addEventListener('keydown', (e) => {
-    if (e.target.matches('input, select') && !['ArrowLeft', 'ArrowRight'].includes(e.key) === false && e.target.id === 'slider') return;
+    if (e.target.matches('input, select')) return;
     const k = e.key;
     const map = {
       ArrowRight: 1, ArrowLeft: -1, ArrowUp: AM.MONTH, ArrowDown: -AM.MONTH, PageUp: AM.Y, PageDown: -AM.Y
@@ -170,13 +175,14 @@
       ['Saros', `miesiąc ${sa.cell + 1}/223, zwój ${sa.turn + 1}`],
       ['Glif', glTxt],
       ['Exeligmos', `+${st.exeligmos.sector * 8} h <span class="gr">(${st.exeligmos.sector + 1}/3)</span>`],
-      ['Korba', `${(st.t * 224 / 48).toFixed(1)} obr. od startu`]
+      ['Korba', `${(st.t * 224 / 48).toFixed(1)} obr. od startu`],
+      ['Dryf', `Słońce ${st.drift.sun >= 0 ? '+' : ''}${st.drift.sun.toFixed(1)}°, Księżyc ${st.drift.moon >= 0 ? '+' : ''}${st.drift.moon.toFixed(1)}° <span class="gr">względem współczesnych średnich położeń</span>`]
     ];
     $('#readout').innerHTML = rows.map((r) => r.length === 1 ? r[0] : `<dt>${r[0]}</dt><dd>${r[1]}</dd>`).join('');
   }
 
   // ---------- start ----------
-  const savedTheme = store.get('am-theme'); if (savedTheme) applyTheme(savedTheme);
+  const savedTheme = store.get('am-theme'); if (savedTheme) applyTheme(savedTheme); themeIcon();
   const savedView = store.get('am-view');
   setView(window.Views[savedView] || savedView === 'about' ? savedView : 'front');
   requestAnimationFrame(loop);

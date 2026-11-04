@@ -253,12 +253,19 @@
     const ex = ((months % 669) + 669) % 669;
     const exeligmos = { angle: (ex / 669) * 360, sector: Math.floor(ex / 223) };
 
+    // dryf: ile mechanizm (rok 365¼ d, relacje Metona) odbiega od współczesnych średnich elementów
+    const T = (jd - 2451545) / 36525;
+    const sd = (a) => ((a % 360) + 540) % 360 - 180;
+    const drift = {
+      sun: sd(sunMean - (280.46646 + 36000.76983 * T + 0.0003032 * T * T)),
+      moon: sd(moonMean - (218.3164477 + 481267.88123421 * T - 0.0015786 * T * T))
+    };
     const eg = egyptian(jd);
     const gearAngles = {};
     for (const g of GEARS) gearAngles[g.id] = norm(g.rate.v * t * 360);
 
     return {
-      jd, t, days, sunMean, sunTrue, sunAnom, moonMean, moonTrue, moonAnom, phase, node, planets,
+      jd, t, days, drift, sunMean, sunTrue, sunAnom, moonMean, moonTrue, moonAnom, phase, node, planets,
       metonic: met, callippic, games, saros, exeligmos,
       egyptian: eg, egRingRot: norm(sunMean - eg.dayCont * 360 / 365),
       julian: calFromJd(jd, false), gregorian: calFromJd(jd, true), gearAngles, crank: gearAngles.a1

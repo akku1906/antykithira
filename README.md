@@ -64,6 +64,7 @@ Test sprawdza na ułamkach dokładnych, że liczby zębów dają 254/19 (Księż
 - **położenia startowe** Słońca, Księżyca, węzłów i planet w 205 p.n.e. wziąłem ze współczesnych średnich elementów (Meeus, J2000). Mechanizm był kalibrowany przez starożytnego konstruktora w nieznany nam sposób;
 - **data juliańska** jest liczona wprost z dnia juliańskiego, czyli jest przybliżoną datą kalendarzową. Dla lat od 1582 panel pokazuje też datę gregoriańską;
 - **wygląd:** kształty, kolory, rozmieszczenie kół w widoku „Wnętrze” (rozmiary nie są w skali) i ozdobne kulki planet są interpretacją;
+- **wspólny start sarosu i Metona:** obie spirale ruszają z nowiu 28 IV 205 p.n.e., a spiralę sarosu zaczynam u góry tarczy. Ani wzajemnego przesunięcia cykli, ani kąta startu sarosu nie sprawdzałem w źródłach;
 - **korba:** 48 zębów a1, czyli około 4,67 obrotu korby na rok. Przeciąganie po tarczy obraca bezpośrednio koło b1.
 
 ## Źródła

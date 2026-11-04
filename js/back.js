@@ -109,7 +109,7 @@
     const gm = spiralGeom(cx, cyM, R * 0.42, R, 5, 235);
     const cells = AM.METONIC_CELLS;
     drawSpiral(ctx, gm, P, fs, (i) => cells[i].name.slice(0, 4), null, st.metonic.cell);
-    subDial(ctx, cx - R * 0.205, cyM, R * 0.19, AM.GAMES.map((g) => [g[1], g[0]]), st.games.angle, P, fs * 0.8, 'igrzyska');
+    subDial(ctx, cx - R * 0.205, cyM, R * 0.19, AM.GAMES.map((g, i) => g.map((n, k) => n + (AM.GAMES_UNCERTAIN[i][k] ? '?' : ''))), st.games.angle, P, fs * 0.8, 'igrzyska');
     subDial(ctx, cx + R * 0.205, cyM, R * 0.19, GREEK_NUM, st.callippic.angle, P, fs, 'Kalippos');
     spiralPointer(ctx, gm, st.metonic.pos, P, R);
     capt('ΜΕΤΩΝ · 19 lat = 235 miesięcy', cyM - R - fs * 0.35);

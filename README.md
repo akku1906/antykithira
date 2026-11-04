@@ -49,7 +49,7 @@ Test sprawdza na ułamkach dokładnych, że liczby zębów dają 254/19 (Księż
 **Wierne rekonstrukcji (Freeth 2006, 2008, 2021; Wright):**
 - liczby zębów i przełożenia kół tylnych, księżycowych i planetarnych, w tym dokładne ułamki 254/19, 235/19, 5/19, 1/76, 1/4, 940/4237, 1/12 oraz okresy planet;
 - układ spiral: 235 komórek w 5 zwojach, 223 komórki w 4 zwojach, ślizgacz przechodzący na następny zwój;
-- tarcze pomocnicze: Kalippos w 4 sektorach, igrzyska w 4 latach (Istmia, Olimpia, Nemea, Naa, Pytia, Halieia), exeligmos z 0, 8 i 16 godzinami;
+- tarcze pomocnicze: Kalippos w 4 sektorach, igrzyska w 4 latach, po dwie nazwy na rok: 1 Istmia + Olimpia, 2 Nemea + Naa, 3 Istmia + Pytia, 4 Nemea + Halieia (pięć nazw według Freeth i in. 2008, Nature 454:614; Halieia, igrzyska rodyjskie, to późniejszy odczyt Iversena z 2017 roku, mniej pewny, na tarczy oznaczony „?”), exeligmos z 0, 8 i 16 godzinami;
 - zasada pin-and-slot dla Księżyca, z platformą e3 obracającą się z okresem apsyd;
 - kalendarz egipski 365-dniowy z greckimi nazwami miesięcy i nazwy miesięcy korynckich na spirali Metona.
 

@@ -49,6 +49,9 @@ for (const [id, yrs] of [['mercury', 480], ['venus', 462], ['mars', 284], ['jupi
   ok(angEq(a.S, b.S, 1e-5) && angEq(a.lon, b.lon, 1e-5), `${id}: po ${yrs} latach ten sam cykl synodyczny i długość`);
 }
 
+const gn = AM.GAMES_PL.flat().map((n) => n.replace(' (?)', ''));
+ok(new Set(gn).size === 6 && gn.length === 8, 'igrzyska: 8 pozycji, 6 różnych nazw: ' + gn.join(', '));
+ok(AM.GAMES_PL[0].join() === 'Istmia,Olimpia' && AM.GAMES_PL[3][1].startsWith('Halieia'), 'rok 1: Istmia + Olimpia, rok 4: Nemea + Halieia');
 console.log('3. Kalendarze');
 ok(AM.jdFromCal(1582, 10, 4, false) === 2299159.5, 'JD 4 X 1582 (jul.) = 2299159.5');
 ok(AM.jdFromCal(2000, 1, 1.5, true) === 2451545, 'JD 1 I 2000 12h (greg.) = 2451545');

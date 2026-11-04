@@ -175,10 +175,13 @@
     }
     return cells;                                         // 235
   })();
+  // Tarcza igrzysk: dwie nazwy na rok. Pięć nazw – Freeth i in. 2008 (Nature 454:614);
+  // ΑΛΙΕΙΑ (Halieia, Rodos) w roku 4 – późniejszy, mniej pewny odczyt Iversena (2017).
   const GAMES = [
     ['ΙΣΘΜΙΑ', 'ΟΛΥΜΠΙΑ'], ['ΝΕΜΕΑ', 'ΝΑΑ'], ['ΙΣΘΜΙΑ', 'ΠΥΘΙΑ'], ['ΝΕΜΕΑ', 'ΑΛΙΕΙΑ']
   ];
-  const GAMES_PL = [['Istmia', 'Olimpia'], ['Nemea', 'Naa'], ['Istmia', 'Pytia'], ['Nemea', 'Halieia']];
+  const GAMES_PL = [['Istmia', 'Olimpia'], ['Nemea', 'Naa'], ['Istmia', 'Pytia'], ['Nemea', 'Halieia (?)']];
+  const GAMES_UNCERTAIN = [[false, false], [false, false], [false, false], [false, true]];
 
   // ---------- zaćmienia: Meeus, „Astronomical Algorithms”, rozdz. 54 (średnie elementy) ----------
   function eclipseAt(k) {            // k całkowite: nów, k+0.5: pełnia
@@ -278,7 +281,7 @@
     F, fmul, fdiv, fsub, fstr, Y, MONTH, GEARS, G, PLANETS, NODES,
     R_SIDEREAL, R_APSIDES, R_ANOMALY, R_SYNODIC,
     jdFromCal, calFromJd, egyptian, EG_MONTHS, EG_MONTHS_PL, EG_EPOCH,
-    JD_START, K_START, meanNewMoon, kNear, eclipseAt, SAROS_GLYPHS, METONIC_CELLS, GAMES, GAMES_PL,
+    JD_START, K_START, meanNewMoon, kNear, eclipseAt, SAROS_GLYPHS, METONIC_CELLS, GAMES, GAMES_PL, GAMES_UNCERTAIN,
     state, jdNow, pinSlot, E_MOON, E_SUN, norm
   };
 });

@@ -62,22 +62,36 @@
     { id: 'g2', z: 20, p: 'g1', rel: 'arbor' },
     { id: 'h1', z: 60, p: 'g2', rel: 'mesh' },
     { id: 'h2', z: 15, p: 'h1', rel: 'arbor' },
-    { id: 'i1', z: 60, p: 'h2', rel: 'mesh', note: 'tarcza exeligmos – 1 obr. / 669 miesięcy' }
+    { id: 'i1', z: 60, p: 'h2', rel: 'mesh', note: 'tarcza exeligmos – 1 obr. / 669 miesięcy' },
+    // tor księżycowy pin-and-slot (Freeth i in. 2006, SI „The Lunar Anomaly”): koła k1 i k2 mają osie
+    // na platformie e3 ('on: e3' – zazębienie liczone względem platformy)
+    { id: 'e5', z: 50, p: 'e2', rel: 'arbor', note: 'zewnętrzny wałek osi E (z e2), wewnątrz e3' },
+    { id: 'k1', z: 50, p: 'e5', rel: 'mesh', on: 'e3', note: 'oś K na e3; kołek na tarczy' },
+    { id: 'k2', z: 50, p: 'k1', rel: 'pin', on: 'e3', note: 'oś K′ przesunięta; szczelina prowadzona kołkiem k1' },
+    { id: 'e6', z: 50, p: 'k2', rel: 'mesh', on: 'e3' },
+    { id: 'e1', z: 32, p: 'e6', rel: 'arbor', note: 'wewnętrzny wałek osi E' },
+    { id: 'b3', z: 32, p: 'e1', rel: 'mesh', note: 'Księżyc prawdziwy – rurka do wskazówki z przodu' }
   ];
   const G = {};
   for (const g of GEARS) {
     if (!g.p) g.rate = F(1);
     else {
       const p = G[g.p];
-      g.rate = g.rel === 'arbor' ? p.rate : fmul(p.rate, F(-p.z, g.z));
+      if (g.rel === 'arbor') g.rate = p.rate;
+      else if (g.rel === 'pin') g.rate = p.rate;                    // średnio tyle samo obrotów co k1
+      else if (g.on) {                                              // zazębienie na obracającej się platformie
+        const c = G[g.on].rate;
+        g.rate = fsub(c, fmul(fsub(p.rate, c), F(p.z, g.z)));
+      } else g.rate = fmul(p.rate, F(-p.z, g.z));
     }
     G[g.id] = g;
   }
+  const relRate = (id) => fsub(G[id].rate, G[G[id].on || 'e3'].rate);  // obroty względem platformy e3
 
-  // Księżyc: e2 daje ruch gwiazdowy, e3 obraca płytkę z kołami pin-and-slot.
-  const R_SIDEREAL = F(Math.abs(G.e2.rate.n), G.e2.rate.d);       // 254/19 obr./rok
+  // Księżyc: e2 daje ruch gwiazdowy, e3 obraca platformę, a z kół wynika reszta.
+  const R_SIDEREAL = G.b3.rate;                                   // średnio 254/19 obr./rok (wskazówka z b3)
   const R_APSIDES = F(Math.abs(G.e3.rate.n), G.e3.rate.d);        // 477/4237 obr./rok
-  const R_ANOMALY = fsub(R_SIDEREAL, R_APSIDES);                  // anomalia: 56165/4237
+  const R_ANOMALY = relRate('k1');                                // k1 względem e3: 56165/4237 obr./rok
   const R_SYNODIC = fsub(R_SIDEREAL, F(1));                       // 235/19
 
   // ---------- planety: Freeth i in. 2021, ryc. 3e–f (cykle synodyczne / lata) ----------
@@ -161,7 +175,30 @@
 
   // pin-and-slot: oś wyjściowa przesunięta o e (w jednostkach promienia kołka)
   const pinSlot = (anomDeg, e) => Math.atan2(e * Math.sin(anomDeg * rad), 1 + e * Math.cos(anomDeg * rad)) / rad;
-  const E_MOON = 0.11;       // ≈ 6,3° – rząd wielkości z rekonstrukcji Freetha 2006
+  const E_MOON = 0.11;       // d/r: ≈ 6,3°; Freeth 2006 mierzy d ≈ 1,1 mm, r = 9,6 mm (≈ 0,115, 6,5°)
+  const R_PIN = 9.6;                  // odległość kołka od osi K [mm] – Freeth i in. 2006
+  const D_K = E_MOON * R_PIN;         // odstęp osi K–K′ [mm] dający e = 0,11 (≈ 1,06 mm)
+
+  /*
+   * Tor księżycowy liczony kinematycznie, koło po kole (kąty w stopniach, znak jak w GEARS).
+   * W układzie platformy e3: k1 obraca się jednostajnie wokół K = (0, 0), kołek P jest w odległości
+   * R_PIN, oś K′ leży w (D_K, 0). k2 obraca się tak, żeby szczelina (promień z K′) przechodziła
+   * przez P – dokładna geometria, bez przybliżeń. Dalej: k2 → e6 (zazębienie na platformie),
+   * e6 = e1 (wspólny wałek), e1 → b3 (zazębienie na stałej osi). Stałe c… to kalibracja startowa.
+   */
+  function lunarTrain(t, moonL, moonM) {
+    const deg = (id) => G[id].rate.v * 360 * t;
+    const e3 = deg('e3');
+    const e5rel = deg('e5') - e3;
+    const k1 = -e5rel * G.e5.z / G.k1.z + moonM;            // faza: kołek najbliżej K′ (k2 najszybsze) w perygeum
+    const px = R_PIN * Math.cos(k1 * rad), py = R_PIN * Math.sin(k1 * rad);
+    let k2 = Math.atan2(py, px - D_K) / rad;                  // kierunek szczeliny K′P
+    k2 += 360 * Math.round((k1 - k2) / 360);                  // ciągłość z k1 (ta sama liczba obrotów)
+    const e6rel = -k2 * G.k2.z / G.e6.z;
+    const e6 = e6rel + e3, e1 = e6;
+    const b3 = -e1 * G.e1.z / G.b3.z + (moonL - moonM);
+    return { e3, k1, k2, e6, e1, b3, pin: [px, py], axisK2: [D_K, 0], anomaly: k2 - k1 };
+  }
   const E_SUN = 1 / 24;      // mimośród Hipparcha ≈ 2,4°
 
   // ---------- tarcze tylne ----------
@@ -271,7 +308,8 @@
     const sunTrue = norm(sunMean + pinSlot(sunAnom, E_SUN));
     const moonMean = norm(CAL.moonL + 360 * turns(R_SIDEREAL));
     const moonAnom = norm(CAL.moonM + 360 * turns(R_ANOMALY));
-    const moonTrue = norm(moonMean + pinSlot(moonAnom, E_MOON));
+    const lunar = lunarTrain(t, CAL.moonL, CAL.moonM);
+    const moonTrue = norm(lunar.b3);                    // wskazówka Księżyca napędzana przez b3
     const phase = norm(moonTrue - sunTrue);             // 0 nów, 180 pełnia
     const node = norm(CAL.node + 360 * turns(NODES.rate));
 
@@ -314,9 +352,10 @@
     const eg = egyptian(jd);
     const gearAngles = {};
     for (const g of GEARS) gearAngles[g.id] = norm(g.rate.v * t * 360);
+    for (const id of ['k1', 'k2', 'e6', 'e1', 'b3']) gearAngles[id] = norm(lunar[id]);   // ruch niejednostajny
 
     return {
-      jd, t, days, drift, sunMean, sunTrue, sunAnom, moonMean, moonTrue, moonAnom, phase, node, planets,
+      jd, t, days, drift, sunMean, sunTrue, sunAnom, moonMean, moonTrue, moonAnom, lunar, phase, node, planets,
       metonic: met, callippic, games, saros, exeligmos,
       egyptian: eg, egRingRot: norm(sunMean - eg.dayCont * 360 / 365),
       julian: calFromJd(jd, false), gregorian: calFromJd(jd, true), gearAngles, crank: gearAngles.a1
@@ -330,6 +369,6 @@
     R_SIDEREAL, R_APSIDES, R_ANOMALY, R_SYNODIC,
     jdFromCal, calFromJd, egyptian, EG_MONTHS, EG_MONTHS_PL, EG_EPOCH,
     JD_START, K_START, JD_METON, K_METON, METON_OFFSET, meanNewMoon, kNear, eclipseAt, SAROS_GLYPHS, OBSERVED_GLYPHS, METONIC_CELLS, EXCLUDED, GAMES, GAMES_PL, GAMES_UNCERTAIN,
-    state, jdNow, pinSlot, E_MOON, E_SUN, norm
+    state, jdNow, pinSlot, lunarTrain, E_MOON, R_PIN, D_K, E_SUN, norm, relRate
   };
 });

@@ -9,6 +9,7 @@ const near = (a, b, eps = 1e-6) => Math.abs(a - b) < eps;
 const angEq = (a, b, eps = 1e-6) => { const d = Math.abs(((a - b) % 360 + 540) % 360 - 180); return d < eps; };
 const G = AM.G;
 const rad = Math.PI / 180;
+const dn0 = (a, b) => ((a - b) % 360 + 540) % 360 - 180;
 
 console.log('1. Przełożenia z liczb zębów (ułamki dokładne)');
 ok(eqF(absF(G.e2.rate), AM.F(254, 19)), 'Księżyc gwiazdowy e2 = 254/19 obr./rok → ' + AM.fstr(absF(G.e2.rate)));
@@ -22,6 +23,44 @@ ok(eqF(AM.fdiv(AM.R_ANOMALY, AM.R_SYNODIC), AM.F(239, 223)), 'anomalia (przez e3
 ok(near(AM.Y / AM.R_APSIDES.v, 365.25 * 4237 / 477), 'e3: okres apsyd = ' + (1 / AM.R_APSIDES.v).toFixed(3) + ' roku');
 for (const p of AM.PLANETS) ok(eqF(p.gearRatio, p.syn), `${p.pl}: zęby ${p.train} → ${AM.fstr(p.gearRatio)} = ${AM.fstr(p.syn)}`);
 ok(eqF(AM.NODES.rate, AM.F(-5, 93)), 'Węzły (smok): 1 − 98/93 = −5/93 obr./rok');
+
+console.log('1b. Tor księżycowy pin-and-slot: e5, k1, k2, e6, e1, b3 (Freeth i in. 2006)');
+ok(['e5', 'k1', 'k2', 'e6', 'e1', 'b3'].every((id) => G[id]), 'koła toru są w GEARS (razem ' + AM.GEARS.length + ')');
+ok(G.e5.z === G.k1.z && G.k2.z === G.e6.z && G.e1.z === G.b3.z, `zęby: e5 ${G.e5.z} = k1 ${G.k1.z}, k2 ${G.k2.z} = e6 ${G.e6.z}, e1 ${G.e1.z} = b3 ${G.b3.z} (tor nie mnoży prędkości)`);
+ok(eqF(G.b3.rate, AM.F(254, 19)), 'średnia prędkość wskazówki z b3 = ' + AM.fstr(G.b3.rate) + ' obr./rok (dokładnie 254/19)');
+const k1rel = AM.relRate('k1');
+ok(eqF(k1rel, AM.fsub(AM.F(254, 19), AM.F(477, 4237))), 'k1 względem e3 = 254/19 − 477/4237 = ' + AM.fstr(k1rel) + ' obr./rok');
+ok(near(1 / k1rel.v, 1 / (254 / 19 - 477 / 4237), 1e-15), 'okres anomalii z kół = ' + (365.25 / k1rel.v).toFixed(4) + ' d');
+ok(eqF(AM.fdiv(k1rel, AM.R_SYNODIC), AM.F(239, 223)), 'z kół: 239 miesięcy anomalistycznych na 223 synodyczne');
+ok(eqF(AM.relRate('k2'), k1rel) && eqF(AM.relRate('e6'), AM.F(-k1rel.n, k1rel.d)), 'k2 średnio jak k1, e6 przeciwnie (względem e3)');
+{
+  // Odchylenie od ruchu średniego w jednym miesiącu anomalistycznym, 3600 próbek (krok 0,1° fazy k1).
+  // Przy maksimum funkcja jest gładka i płaska, więc błąd próbkowania ≤ ½·|A''|·(0,05°)² < 1e-6°;
+  // tolerancja 1e-3° zostawia zapas na arytmetykę zmiennoprzecinkową.
+  const Ta = 1 / k1rel.v; let mx = -1e9, mn = 1e9;
+  for (let i = 0; i < 3600; i++) { const L = AM.lunarTrain(Ta * i / 3600, 0, 0); mx = Math.max(mx, L.anomaly); mn = Math.min(mn, L.anomaly); }
+  const amax = Math.asin(AM.E_MOON) / rad;
+  ok(Math.abs(mx - amax) < 1e-3 && Math.abs(-mn - amax) < 1e-3, `największe odchylenie ±${mx.toFixed(4)}° = arcsin(${AM.E_MOON}) = ${amax.toFixed(4)}° (Freeth 2006 dla 1,1/9,6 mm: 6,5°)`);
+  const q = AM.lunarTrain(Ta / 4, 0, 0);
+  ok(q.anomaly > 6 && q.k2 > q.k1, 'ćwierć miesiąca po perygeum Księżyc wyprzedza ruch średni (+' + q.anomaly.toFixed(2) + '°)');
+}
+{
+  // kinematyka koło po kole wobec wzoru epicyklu Hipparcha (anomalia M od perygeum): true = średnia + atan2(e·sin M, 1 − e·cos M)
+  // oraz wobec dotychczasowego wzoru silnika: średnia + atan2(e·sin M, 1 + e·cos M)
+  let dEpi = 0, dOld = 0, at = 0;
+  for (let i = 0; i <= 20000; i++) {
+    const st = AM.state(AM.JD_START + i * 223 * AM.MONTH / 20000);
+    const M = st.moonAnom * rad, e = AM.E_MOON;
+    const epi = AM.norm(st.moonMean + Math.atan2(e * Math.sin(M), 1 - e * Math.cos(M)) / rad);
+    const old = AM.norm(st.moonMean + AM.pinSlot(st.moonAnom, e));
+    const a = Math.abs(dn0(st.moonTrue, epi)), b = dn0(st.moonTrue, old);
+    dEpi = Math.max(dEpi, a); if (Math.abs(b) > Math.abs(dOld)) { dOld = b; at = st.moonAnom; }
+  }
+  ok(dEpi < 1e-9, `kinematyka = epicykl Hipparcha (M od perygeum): największa różnica w sarosie ${dEpi.toExponential(1)}°`);
+  const pred = AM.E_MOON * AM.E_MOON / rad;
+  console.log(`       nowy model − stary wzór (jeden saros, 20001 próbek): największa różnica ${dOld.toFixed(3)}° przy anomalii ${at.toFixed(0)}°`);
+  ok(Math.abs(Math.abs(dOld) - pred) < 0.01, `różnica = składnik 2. rzędu ≈ e²·sin 2M, amplituda e² = ${pred.toFixed(3)}° (stary wzór miał odwrócony znak tego składnika)`);
+}
 
 console.log('2. Powroty cykli (silnik stanu)');
 const j0 = AM.JD_START, s0 = AM.state(j0);

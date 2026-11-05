@@ -19,7 +19,7 @@ To czysty HTML, CSS i JavaScript z Canvas 2D, bez bibliotek i bez kroku budowani
 node test.js
 ```
 
-Test sprawdza na ułamkach dokładnych, że liczby zębów dają 254/19 (Księżyc gwiazdowy), 5/19 (Meton), 1/76 (Kalippos), 1/4 (igrzyska), 4 obroty na 223 miesiące (saros), 1/12 sarosu (exeligmos) i okresy planet z artykułu Freetha. Sprawdza też, że po 223 miesiącach wskazówka sarosu i ślizgacz wracają do startu, a po 235 miesiącach — wskazówka Metona. Do tego dochodzą powroty Kalipposa, igrzysk i planet, kalendarze oraz wykrywanie znanych zaćmień z lat 2022 i 2024.
+Test sprawdza na ułamkach dokładnych, że liczby zębów dają 254/19 (Księżyc gwiazdowy), 5/19 (Meton), 1/76 (Kalippos), 1/4 (igrzyska), 4 obroty na 223 miesiące (saros), 1/12 sarosu (exeligmos) i okresy planet z artykułu Freetha. Sprawdza też, że po 223 miesiącach wskazówka sarosu i ślizgacz wracają do startu, a po 235 miesiącach — wskazówka Metona. Do tego dochodzą powroty Kalipposa, igrzysk i planet, kalendarze oraz wykrywanie znanych zaćmień z lat 2022 i 2024. Test sprawdza też epoki tarcz tylnych (saros 28 IV, kalendarz 23 VIII 205 p.n.e.) i położenia planet w epoce względem JPL DE441 (`test-dane/de441-205pne.json`).
 
 ## Pliki
 
@@ -31,6 +31,7 @@ Test sprawdza na ułamkach dokładnych, że liczby zębów dają 254/19 (Księż
 | `js/app.js` | sterowanie, korba, panel odczytów |
 | `sw.js`, `manifest.webmanifest` | tryb offline (PWA) |
 | `test.js` | test silnika |
+| `test-dane/de441-205pne.json` | dane referencyjne JPL Horizons (DE441) dla epoki, używane tylko przez test |
 
 ## Decyzje
 
@@ -62,6 +63,7 @@ Test sprawdza na ułamkach dokładnych, że liczby zębów dają 254/19 (Księż
 - **geometria planet:** zamiast odtwarzać ramiona pin-and-slot z Supplementary Table S9 używam równoważnego modelu deferent–epicykl z kołowymi orbitami o współczesnych promieniach. Prędkości dokładnie odpowiadają przełożeniom kół, ale amplituda pętli wstecznych jest przybliżona;
 - **mimośrody:** Księżyc e = 0,11 (około 6,3°, rząd wielkości z rekonstrukcji 2006), Słońce e = 1/24 (wartość Hipparcha). Dokładne wymiary kołków na oryginale są niepewne;
 - **położenia startowe** Słońca, Księżyca, węzłów i planet w 205 p.n.e. wziąłem ze współczesnych średnich elementów (Meeus, J2000). Mechanizm był kalibrowany przez starożytnego konstruktora w nieznany nam sposób;
+- **pozycje planet w 205 p.n.e.** sprawdziłem tylko względem współczesnej efemerydy JPL DE441, a nie względem starożytnych obserwacji; opis w części „Weryfikacja pozycji planet”;
 - **data juliańska** jest liczona wprost z dnia juliańskiego, czyli jest przybliżoną datą kalendarzową. Dla lat od 1582 panel pokazuje też datę gregoriańską;
 - **wygląd:** kształty, kolory, rozmieszczenie kół w widoku „Wnętrze” (rozmiary nie są w skali) i ozdobne kulki planet są interpretacją;
 - **epoka kalendarza:** spirala Metona startuje 4 miesiące po sarosie (23 VIII 205 p.n.e.). To hipoteza Iversena (2017), a nie odczyt z fragmentów; opis i stopień pewności w części „Weryfikacja epok”;
@@ -94,6 +96,20 @@ Samego artykułu Carmana i Evansa (2014) nie czytałem, bo jest za paywallem. To
 - W źródłach są dwie niespójności w liczeniu. Jones w akapicie 153 pisze „five months earlier”, a w przypisie 64 „four months”. Carman 2017 w streszczeniu pisze, że Meton zaczyna się cztery miesiące „earlier” niż saros, choć 25 sierpnia wypada po 27 kwietnia. Zgaduję, że Jones liczy włącznie, a u Carmana to pomyłka w słowie; daty w obu tekstach są jednoznaczne.
 - Tarcza exeligmos: Jones (akapit 109) pisze, że początek cyklu exeligmos jest na godzinie 1, żeby w epoce kalendarza wskazówki dolnych tarcz były równoległe. W modelu sektory exeligmos zaczynają się u góry. Tego nie zmieniałem, bo zadanie wyklucza zmiany wyglądu.
 
+## Weryfikacja pozycji planet
+
+Położenia startowe planet pochodzą ze średnich elementów Meeusa. Porównanie ich z Meeusem byłoby tautologią, więc szukałem źródła niezależnego. W tym środowisku jest dostępny JPL Horizons z efemerydą DE441, która obejmuje także 205 p.n.e. Wartości dla epoki modelu (`JD_START`) zapisałem w `test-dane/de441-205pne.json`, razem z parametrami zapytań i datą pobrania, więc `node test.js` działa bez sieci. Sekcja 5 testu sprawdza dwie rzeczy.
+
+- **Faza synodyczna w epoce**, czyli wartość, którą model naprawdę bierze z Meeusa (`S0`). Liczę ją z oskulacyjnych elementów DE441 (L = Ω + ω + M, ekliptyka J2000). Różnice wynoszą: Merkury −0,002°, Wenus −0,002°, Mars −0,005°, Jowisz +0,21°, Saturn −0,49°. Tolerancja to 1°. U Jowisza i Saturna długość oskulacyjna różni się od średniej głównie przez wielką nierówność; jej amplitudy (około 0,3° dla Jowisza i 0,8° dla Saturna) podaję z pamięci, niesprawdzone. Test łapie błędy: Jowisz przesunięty o 3° albo epoka przesunięta o 10 dni dają czerwone wyniki.
+- **Długość geocentryczna w epoce** (ekliptyka daty) wobec pozornej długości z DE441. Różnice wynoszą: Merkury +1,5°, Wenus −0,3°, Mars −3,4°, Jowisz −4,7°, Saturn −3,8°. Model ma orbity kołowe, więc granica błędu wynika z mimośrodów: przesunięcie planety i Ziemi o 2e·a widziane z odległości Δ, plus 1°. To słaby test, który wyłapie tylko grube pomyłki (znak, epokę, układ odniesienia). Dla Jowisza margines jest mały (4,7° przy granicy 5,9°).
+
+Co z tego wynika, a co nie:
+
+- Średnie elementy Meeusa, przeniesione liniowo na 205 p.n.e., zgadzają się z numeryczną efemerydą DE441 w granicach okresowych zaburzeń. Startowe położenia planet w modelu nie mają więc błędu rachunkowego.
+- To **nie** jest weryfikacja wobec nieba widzianego w starożytności. DE441 i elementy Meeusa to dwie różne metody, ale obie wyrastają ze współczesnych obserwacji i współczesnej mechaniki nieba. Naprawdę niezależne byłyby starożytne obserwacje planet, na przykład babilońskie dzienniki astronomiczne z tego okresu. Nie znalazłem ich w tym środowisku w formie, której test mógłby użyć, i nie próbowałem ich zastępować.
+- Test nie mówi nic o tym, jak położenia planet ustawił konstruktor mechanizmu. Tego nie da się sprawdzić bez zachowanych odczytów wskazówek planet.
+- Sprawdzam tylko epokę. Później model obraca planety według przełożeń kół, a nie według rzeczywistych okresów, więc jego rozjazd z niebem w innych latach jest zamierzony i nie podlega temu testowi.
+
 ## Źródła
 
 - D. de Solla Price, *Gears from the Greeks*, Trans. Am. Philos. Soc. 64 (1974).
@@ -107,5 +123,6 @@ Samego artykułu Carmana i Evansa (2014) nie czytałem, bo jest za paywallem. To
 - C. C. Carman, *The Final Date of the Antikythera Mechanism*, Journal for the History of Astronomy 48 (2017), s. 312–323 (czytane tylko streszczenie).
 - A. Jones, *The Epoch Dates of the Antikythera Mechanism (With an Appendix on its Authenticity)*, ISAW Papers 17 (2020), http://dlib.nyu.edu/awdl/isaw/isaw-papers/17/
 - J. Meeus, *Astronomical Algorithms*, 2. wyd. (1998).
+- JPL Horizons, efemeryda DE441 (R. S. Park i in., Astron. J. 161:105, 2021), https://ssd.jpl.nasa.gov/horizons/
 
 Strona działa pod `/antykithira/`, więc wszystkie ścieżki są względne. Plik `.nojekyll` wyłącza przetwarzanie przez Jekyll. GitHub Pages trzeba włączyć w ustawieniach repozytorium (gałąź `main`, katalog główny).

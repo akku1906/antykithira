@@ -10,6 +10,8 @@ const angEq = (a, b, eps = 1e-6) => { const d = Math.abs(((a - b) % 360 + 540) %
 const G = AM.G;
 const rad = Math.PI / 180;
 const dn0 = (a, b) => ((a - b) % 360 + 540) % 360 - 180;
+// dawny wzór silnika (usunięty): atan2(e·sin M, 1 + e·cos M) – tylko do porównania w testach
+const oldFormula = (Mdeg, e) => Math.atan2(e * Math.sin(Mdeg * rad), 1 + e * Math.cos(Mdeg * rad)) / rad;
 
 console.log('1. Przełożenia z liczb zębów (ułamki dokładne)');
 ok(eqF(absF(G.e2.rate), AM.F(254, 19)), 'Księżyc gwiazdowy e2 = 254/19 obr./rok → ' + AM.fstr(absF(G.e2.rate)));
@@ -52,7 +54,7 @@ ok(eqF(AM.relRate('k2'), k1rel) && eqF(AM.relRate('e6'), AM.F(-k1rel.n, k1rel.d)
     const st = AM.state(AM.JD_START + i * 223 * AM.MONTH / 20000);
     const M = st.moonAnom * rad, e = AM.E_MOON;
     const epi = AM.norm(st.moonMean + Math.atan2(e * Math.sin(M), 1 - e * Math.cos(M)) / rad);
-    const old = AM.norm(st.moonMean + AM.pinSlot(st.moonAnom, e));
+    const old = AM.norm(st.moonMean + oldFormula(st.moonAnom, e));
     const a = Math.abs(dn0(st.moonTrue, epi)), b = dn0(st.moonTrue, old);
     dEpi = Math.max(dEpi, a); if (Math.abs(b) > Math.abs(dOld)) { dOld = b; at = st.moonAnom; }
   }
@@ -60,6 +62,33 @@ ok(eqF(AM.relRate('k2'), k1rel) && eqF(AM.relRate('e6'), AM.F(-k1rel.n, k1rel.d)
   const pred = AM.E_MOON * AM.E_MOON / rad;
   console.log(`       nowy model − stary wzór (jeden saros, 20001 próbek): największa różnica ${dOld.toFixed(3)}° przy anomalii ${at.toFixed(0)}°`);
   ok(Math.abs(Math.abs(dOld) - pred) < 0.01, `różnica = składnik 2. rzędu ≈ e²·sin 2M, amplituda e² = ${pred.toFixed(3)}° (stary wzór miał odwrócony znak tego składnika)`);
+}
+
+console.log('1c. Prawdziwe Słońce: ten sam pin-and-slot (e = 1/24, anomalia od perygeum)');
+{
+  const e = AM.E_SUN, s0 = AM.state(AM.JD_START);
+  ok(typeof AM.pinSlot === 'undefined', 'stara funkcja pinSlot usunięta z silnika');
+  // chwila, w której anomalia Słońca = M (anomalia rośnie 360° na rok mechanizmu)
+  const jdAt = (M) => AM.JD_START + (((M - s0.sunAnom) % 360 + 360) % 360) / 360 * AM.Y;
+  // prędkość prawdziwego Słońca względem średniego: różnica centralna ±0,01 d
+  const rate = (jd) => { const h = 0.01, a = AM.state(jd - h), b = AM.state(jd + h); return dn0(b.sunTrue, a.sunTrue) / dn0(b.sunMean, a.sunMean) - 1; };
+  const rP = rate(jdAt(0)), rA = rate(jdAt(180));
+  ok(Math.abs(rP - e / (1 - e)) < 1e-6, `w perygeum Słońce szybsze o ${rP.toFixed(6)} = e/(1−e) = ${(e / (1 - e)).toFixed(6)} ruchu średniego`);
+  ok(Math.abs(rA + e / (1 + e)) < 1e-6, `w apogeum Słońce wolniejsze o ${(-rA).toFixed(6)} = e/(1+e) = ${(e / (1 + e)).toFixed(6)}`);
+  // odchylenie w jednym roku, 3600 próbek (krok 0,1° anomalii): błąd próbkowania maksimum < 1e-6°, tolerancja 1e-3°
+  let mx = -1e9, mn = 1e9, dmax = 0, dAt = 0;
+  for (let i = 0; i < 3600; i++) {
+    const st = AM.state(AM.JD_START + AM.Y * i / 3600), a = dn0(st.sunTrue, st.sunMean);
+    mx = Math.max(mx, a); mn = Math.min(mn, a);
+    const d = dn0(AM.norm(st.sunMean + oldFormula(st.sunAnom, e)), st.sunTrue);
+    if (Math.abs(d) > Math.abs(dmax)) { dmax = d; dAt = st.sunAnom; }
+  }
+  const amax = Math.asin(e) / rad;
+  ok(Math.abs(mx - amax) < 1e-3 && Math.abs(-mn - amax) < 1e-3, `największe odchylenie Słońca ±${mx.toFixed(4)}° = arcsin(1/24) = ${amax.toFixed(4)}°`);
+  console.log(`       stary − nowy wzór Słońca (jeden rok, 3600 próbek): największa różnica ${dmax.toFixed(4)}° przy anomalii ${dAt.toFixed(0)}°`);
+  ok(Math.abs(Math.abs(dmax) - e * e / rad) < 0.002, `różnica Słońca = składnik 2. rzędu, amplituda e² = ${(e * e / rad).toFixed(4)}°`);
+  const k = [0, 37, 90, 200, 333].every((u) => Math.abs(AM.slotAngle(u, 9.6, AM.D_K) - u - Math.atan2(AM.E_MOON * Math.sin(u * rad), 1 - AM.E_MOON * Math.cos(u * rad)) / rad) < 1e-12);
+  ok(k, 'slotAngle (wspólna dla Księżyca i Słońca) = atan2(e·sin u, 1 − e·cos u)');
 }
 
 console.log('2. Powroty cykli (silnik stanu)');

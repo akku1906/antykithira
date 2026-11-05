@@ -173,8 +173,17 @@
     p.S0 = p.inner ? norm(L - CAL.earthL) : norm(CAL.earthL + 180 - L);
   }
 
-  // pin-and-slot: oś wyjściowa przesunięta o e (w jednostkach promienia kołka)
-  const pinSlot = (anomDeg, e) => Math.atan2(e * Math.sin(anomDeg * rad), 1 + e * Math.cos(anomDeg * rad)) / rad;
+  /*
+   * Pin-and-slot – wspólna kinematyka dla Księżyca i prawdziwego Słońca (Freeth i in. 2006, 2021).
+   * Kołek leży w odległości rPin od osi koła napędzającego (K = (0, 0)) pod kątem pinDeg; koło
+   * napędzane obraca się wokół osi K′ = (dAxis, 0), a jego szczelina zawsze przechodzi przez kołek.
+   * Zwraca kierunek szczeliny (kąt koła napędzanego), ciągły z pinDeg. Dokładna geometria:
+   * slot − pin = atan2(e·sin u, 1 − e·cos u), e = dAxis/rPin; u = 0 – kołek najbliżej K′ (najszybciej).
+   */
+  function slotAngle(pinDeg, rPin, dAxis) {
+    const a = Math.atan2(rPin * Math.sin(pinDeg * rad), rPin * Math.cos(pinDeg * rad) - dAxis) / rad;
+    return a + 360 * Math.round((pinDeg - a) / 360);
+  }
   const E_MOON = 0.11;       // d/r: ≈ 6,3°; Freeth 2006 mierzy d ≈ 1,1 mm, r = 9,6 mm (≈ 0,115, 6,5°)
   const R_PIN = 9.6;                  // odległość kołka od osi K [mm] – Freeth i in. 2006
   const D_K = E_MOON * R_PIN;         // odstęp osi K–K′ [mm] dający e = 0,11 (≈ 1,06 mm)
@@ -192,8 +201,7 @@
     const e5rel = deg('e5') - e3;
     const k1 = -e5rel * G.e5.z / G.k1.z + moonM;            // faza: kołek najbliżej K′ (k2 najszybsze) w perygeum
     const px = R_PIN * Math.cos(k1 * rad), py = R_PIN * Math.sin(k1 * rad);
-    let k2 = Math.atan2(py, px - D_K) / rad;                  // kierunek szczeliny K′P
-    k2 += 360 * Math.round((k1 - k2) / 360);                  // ciągłość z k1 (ta sama liczba obrotów)
+    const k2 = slotAngle(k1, R_PIN, D_K);                    // kierunek szczeliny K′P
     const e6rel = -k2 * G.k2.z / G.e6.z;
     const e6 = e6rel + e3, e1 = e6;
     const b3 = -e1 * G.e1.z / G.b3.z + (moonL - moonM);
@@ -305,7 +313,8 @@
     const turns = (fr) => fr.v * t;
     const sunMean = norm(CAL.sunL + 360 * t);
     const sunAnom = norm(CAL.sunM + 360 * t);
-    const sunTrue = norm(sunMean + pinSlot(sunAnom, E_SUN));
+    // prawdziwe Słońce: ten sam kołek w szczelinie, anomalia od perygeum (Słońce najszybsze w perygeum)
+    const sunTrue = norm(sunMean + slotAngle(sunAnom, 1, E_SUN) - sunAnom);
     const moonMean = norm(CAL.moonL + 360 * turns(R_SIDEREAL));
     const moonAnom = norm(CAL.moonM + 360 * turns(R_ANOMALY));
     const lunar = lunarTrain(t, CAL.moonL, CAL.moonM);
@@ -369,6 +378,6 @@
     R_SIDEREAL, R_APSIDES, R_ANOMALY, R_SYNODIC,
     jdFromCal, calFromJd, egyptian, EG_MONTHS, EG_MONTHS_PL, EG_EPOCH,
     JD_START, K_START, JD_METON, K_METON, METON_OFFSET, meanNewMoon, kNear, eclipseAt, SAROS_GLYPHS, OBSERVED_GLYPHS, METONIC_CELLS, EXCLUDED, GAMES, GAMES_PL, GAMES_UNCERTAIN,
-    state, jdNow, pinSlot, lunarTrain, E_MOON, R_PIN, D_K, E_SUN, norm, relRate
+    state, jdNow, slotAngle, lunarTrain, E_MOON, R_PIN, D_K, E_SUN, norm, relRate
   };
 });

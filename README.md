@@ -110,6 +110,32 @@ Co z tego wynika, a co nie:
 - Test nie mówi nic o tym, jak położenia planet ustawił konstruktor mechanizmu. Tego nie da się sprawdzić bez zachowanych odczytów wskazówek planet.
 - Sprawdzam tylko epokę. Później model obraca planety według przełożeń kół, a nie według rzeczywistych okresów, więc jego rozjazd z niebem w innych latach jest zamierzony i nie podlega temu testowi.
 
+## Tor księżycowy pin-and-slot – weryfikacja w źródłach
+
+Źródło podstawowe: Freeth i in. 2006 (Nature 444:587). Korzystałem z tekstu artykułu (część o anomalii Księżyca) i z materiałów uzupełniających: tabeli liczb zębów w Supplementary Notes 3 (Gears) oraz rozdziałów „The Lunar Anomaly”, „Pin-and-Slot Mechanism” i „Geometric Proof”.
+
+**Co mówi źródło**
+
+- Układ toru: e2 jest połączone z e5 zewnętrznym wałkiem, który obraca się swobodnie wewnątrz e3, na osi E w środku e3. Dalej idzie tor e5–k1 + k2–e6 + e1–b3. e6 i e1 łączy wewnętrzny wałek osi E, a z b3 ruch idzie do wskazówki Księżyca i kulki fazy z przodu. k1 obraca się wokół osi K, a k2 wokół osi K′, lekko przesuniętej. Obie osie są przymocowane do e3. Kołek na tarczy k1 wchodzi w promieniową szczelinę w k2 (tekst artykułu i SI). To zgadza się z założonym układem.
+- Liczby zębów w tabeli SI (najlepsze dopasowanie z CT, w nawiasie granice; dalej Wright i Price):
+
+  | koło | CT, Freeth 2006 | Wright | Price | w tekście SI i w modelu |
+  |---|---|---|---|---|
+  | e5 | 52 (50–52) | 51 | – | 50 |
+  | k1 | 49/50 (48–51) | 49 | – | 50 |
+  | k2 | 50 (48–52) | 49 | 48 | 50 |
+  | e6 | 50 (49/50) | 53 | 48 | 50 |
+  | e1 | 32 (pewne) | 32 | 32 | 32 |
+  | b3 | 32 (pewne) | 32 | 32 | 32 |
+
+  W rozdziale „The Lunar Anomaly” autorzy przyjmują: „e5 and k1 both have 50 teeth”, „k2 and e6 have the same number of teeth” oraz że b3 ma tyle zębów co e1. Te wartości (50, 50, 50, 50, 32, 32) biorę do modelu.
+- Wymiary: „distance between the arbors on the k gears is about 1.1 mm, with a pin distance of 9.6 mm, giving an angular variation of 6.5°” (tekst artykułu). Autorzy dodają, że parametry Hipparcha dawałyby 5,9° albo 4,5°, a różnica może wynikać z trudności pomiaru osi w CT.
+
+**Mój wniosek**
+
+- Pomiar CT dla e5 (52) różni się od wartości przyjętej w tekście (50). Równość e5 = k1 nie jest jednak kwestią pomiaru, tylko warunkiem działania toru. Tylko wtedy k1 obraca się względem e3 z okresem miesiąca anomalistycznego. Przy e5 = 52 i k1 = 50 okres anomalii byłby o 4% za krótki. Podobnie k2 = e6 i e1 = b3 są potrzebne, żeby średni ruch wskazówki pozostał gwiazdowy (254/19). Dlatego przyjmuję wartości z tekstu i traktuję rozbieżność z CT jako błąd pomiaru zębów na skorodowanych kołach.
+- Odstęp osi i promień kołka ze źródła dają stosunek d/r = 1,1/9,6 ≈ 0,115 i największe odchylenie arcsin(0,115) ≈ 6,6°. Autorzy podają 6,5°. Model zachowuje dotychczasowy mimośród e = 0,11, czyli największe odchylenie arcsin(0,11) ≈ 6,32°. Przy kołku 9,6 mm odpowiada to odstępowi osi d = 0,11 · 9,6 ≈ 1,06 mm, co mieści się w niepewności pomiaru „about 1.1 mm”.
+
 ## Źródła
 
 - D. de Solla Price, *Gears from the Greeks*, Trans. Am. Philos. Soc. 64 (1974).

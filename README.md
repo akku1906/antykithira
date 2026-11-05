@@ -40,7 +40,7 @@ Test sprawdza na ułamkach dokładnych, że liczby zębów dają 254/19 (Księż
 - **Planety** pochodzą z artykułu Freeth i in. 2021 (Scientific Reports 11:5821), którego treść udało się przeczytać. Przełożenia wziąłem z ryc. 3e–f: Merkury 1513 cykli synodycznych na 480 lat (51 ~ 72 + 89 ~ 40 ~ 20), Wenus 289/462 (51 ~ 44 + 34 ~ 26 ~ 63), Mars 133/284 (56 ~ 64 + 38 ~ 40 ~ 71), Jowisz 315/344 (56 ~ 64 + 45 ~ 40 ~ 43), Saturn 427/442 (56 ~ 52 + 61 ~ 40 ~ 68), prawdziwe Słońce 56 ~ 52 ~ 56, węzły 49 ~ 62 + 64 ~ 48, czyli −5/93 obrotu na rok. Test potwierdza, że liczby zębów dają te ułamki.
 - **Kolejność pierścieni od środka** idzie za artykułem: Księżyc, Merkury, Wenus, Słońce, Mars, Jowisz, Saturn, data. Smok węzłów jest w artykule wprost oznaczony jako hipotetyczny.
 - **Glify zaćmień** biorę z Freetha (2014). Model Meeusa nie służy już do ich rozmieszczania, bo EYM pokrywa wszystkie 223 komórki i żadnej nie zostawia pustej. Meeus zostaje jako niezależne porównanie: panel pokazuje, czy w danej lunacji od 205 p.n.e. faktycznie wystąpiło zaćmienie. Zgodność jest wysoka: wszystkie 28 glifów Η to rzeczywiste zaćmienia Słońca (widoczne gdziekolwiek na Ziemi), wszystkie 26 cieniowych zaćmień Księżyca w tym sarosie ma glif Σ, a pozostałe 12 glifów Σ to zaćmienia półcieniowe albo przewidywania „na zapas”.
-- **Start:** nów około 28 kwietnia 205 p.n.e. (kalendarz juliański), pełnia 12 maja. To **hipoteza** Carmana i Evansa (2014), oparta na zgodności glifów sarosu z zaćmieniami. Data nie jest pewna; inni badacze uważają, że mechanizm zbudowano później, a 205 p.n.e. to tylko data odniesienia na tarczy. W tym modelu od tego nowiu zaczynają się zarówno saros, jak i cykl Metona (to uproszczenie).
+- **Start:** nów około 28 kwietnia 205 p.n.e. (kalendarz juliański), pełnia 12 maja. To **hipoteza** Carmana i Evansa (2014), oparta na zgodności glifów sarosu z zaćmieniami. Data nie jest pewna; inni badacze uważają, że mechanizm zbudowano później, a 205 p.n.e. to tylko data odniesienia na tarczy. Od tego nowiu liczy się saros. Kalendarz na spirali Metona (razem z igrzyskami i Kalipposem) zaczyna się 4 miesiące później, od nowiu 23 sierpnia 205 p.n.e. (szczegóły w części „Weryfikacja epok”). Przycisk „205 p.n.e.” i klawisz `S` ustawiają epokę sarosu; Meton jest wtedy w komórce 232, w 19. roku poprzedniego cyklu.
 - **Kierunek na przodzie:** długość ekliptyczna rośnie zgodnie z ruchem wskazówek zegara, 0° Barana jest u góry.
 - **Pierścień egipski** obraca się sam tak, żeby wskazówka daty pokazywała bieżący dzień egipski. W oryginale użytkownik przestawiał go ręcznie o dzień co 4 lata.
 - **Dryf:** model liczy wyłącznie przełożeniami mechanizmu, więc z dala od 205 p.n.e. rozjeżdża się z niebem tak samo jak oryginał (dziś Słońce jest przesunięte o około 17°, Księżyc o około 105°). Panel pokazuje ten dryf względem współczesnych średnich położeń.
@@ -64,8 +64,35 @@ Test sprawdza na ułamkach dokładnych, że liczby zębów dają 254/19 (Księż
 - **położenia startowe** Słońca, Księżyca, węzłów i planet w 205 p.n.e. wziąłem ze współczesnych średnich elementów (Meeus, J2000). Mechanizm był kalibrowany przez starożytnego konstruktora w nieznany nam sposób;
 - **data juliańska** jest liczona wprost z dnia juliańskiego, czyli jest przybliżoną datą kalendarzową. Dla lat od 1582 panel pokazuje też datę gregoriańską;
 - **wygląd:** kształty, kolory, rozmieszczenie kół w widoku „Wnętrze” (rozmiary nie są w skali) i ozdobne kulki planet są interpretacją;
-- **wspólny start sarosu i Metona:** obie spirale ruszają z nowiu 28 IV 205 p.n.e., a spiralę sarosu zaczynam u góry tarczy. Ani wzajemnego przesunięcia cykli, ani kąta startu sarosu nie sprawdzałem w źródłach;
+- **epoka kalendarza:** spirala Metona startuje 4 miesiące po sarosie (23 VIII 205 p.n.e.). To hipoteza Iversena (2017), a nie odczyt z fragmentów; opis i stopień pewności w części „Weryfikacja epok”;
 - **korba:** 48 zębów a1, czyli około 4,67 obrotu korby na rok. Przeciąganie po tarczy obraca bezpośrednio koło b1.
+
+## Weryfikacja epok
+
+Sprawdzałem dwie rzeczy, które wcześniej były oznaczone jako niesprawdzone: czy spirale sarosu i Metona mają wspólny początek oraz pod jakim kątem startuje spirala sarosu. Poniżej oddzielam to, co mówi źródło, od mojego wniosku i od tego, co zgaduję.
+
+**Co mówią źródła**
+
+- Freeth i in. 2008 (Nature 454:614), materiały uzupełniające, §3.3: spirala Metona biegnie zgodnie z ruchem wskazówek zegara od punktu startu na dole, wewnątrz spirali. §4.7 i ryc. S23: cztery zwoje sarosu odpowiadają cyklom pełni (16 na saros), na środkowej płytce tarczy sarosu jest możliwa kreska skali dokładnie na godzinie 3. O dacie startu i o wzajemnym położeniu obu cykli ten tekst milczy.
+- Freeth 2014 (PLOS ONE 9:e103275), Note S5 i tabela S5: pierwsza pełnia tarczy sarosu to 12 V 205 p.n.e. (−204-05-12). Note S5, „The Saros Dial and the Full Moon Cycle”, i ryc. S21: ćwiartki tarczy zgadzają się z cyklem pełni, a zaćmienia całkowite skupiają się przy punktach kardynalnych (góra, prawo, dół, lewo). Skąd startuje spirala, artykuł nie mówi wprost. O spirali Metona w tym kontekście nie ma nic.
+- Iversen 2017 (Hesperia 86), s. 130, przyp. 3: komórka 1 sarosu odpowiada miesiącowi księżycowemu od 29 IV 205 p.n.e. Na s. 181–183 i ryc. 12 autor pisze, że wskazówki Metona i sarosu nie mogły stać jednocześnie na komórce 1 (nie da się uwierzyć, by Olimpia, która wypada w roku 1, odbyła się między końcem kwietnia 205 a połową maja 204 p.n.e.). Jego zdaniem Phoinikaios 1 roku 1 zaczyna się 1–3 dni po nowiu 23 VIII 205 p.n.e. Wskazówki Metona i igrzysk stoją wtedy w dół (180°), a wskazówka sarosu na początku komórki 5. Iversen powołuje się tu na Carmana i Evansa (2014, s. 761–762), którzy według niego też uznali, że wszystkie trzy wskazówki nie mogły startować razem.
+- Jones 2020 (*The Epoch Dates of the Antikythera Mechanism*, ISAW Papers 17, otwarty dostęp; spoza listy źródeł zadania) w akapicie 38 pisze, że początek i koniec spirali sarosu leżą dokładnie nad osią wskazówki, czyli u góry. W akapitach 108–109 i w przypisie 64 przyjmuje epokę kalendarza Iversena (nów 23 VIII, sierp 25 VIII 205 p.n.e.) i podaje, że cztery miesiące po epoce zaćmień wskazówka sarosu stoi około 26° w prawo od pionu.
+- Carman 2017 (JHA 48:312; czytałem tylko streszczenie) mówi o „wyłaniającym się konsensusie”: saros startuje 27 IV 205 p.n.e., Meton 25 VIII 205 p.n.e.
+
+Samego artykułu Carmana i Evansa (2014) nie czytałem, bo jest za paywallem. To, co o nim piszę, znam z Iversena, Freetha i Jonesa.
+
+**Mój wniosek**
+
+- Wspólnego początku nie podaje żadne źródło, które w ogóle zajmuje się tą sprawą. Iversen, Jones i Carman 2017 są zgodni, że spirala Metona startuje 4 miesiące synodyczne po sarosie. Freeth (2008, 2014) w tej sprawie milczy, więc z nikim się nie kłóci. Dlatego zmieniłem kod: `METON_OFFSET = 4` w `js/engine.js`, a epoka kalendarza to `JD_METON = JD_START + 4` miesiące mechanizmu. Wskazówki są połączone kołami, więc przesunięcie musi wynosić dokładnie 4 miesiące mechanizmu. Od astronomicznego nowiu różni się to o mniej niż 0,01 dnia.
+- Kąt startu sarosu (u góry) był już w kodzie i źródła go potwierdzają. Wprost mówi to Jones 2020, a pośrednio pasuje do tego położenie 26° w epoce kalendarza: model daje 25,8°. Kodu rysowania nie zmieniałem.
+- Nowe testy w sekcji 3b `test.js`: w epoce sarosu jest komórka 1 i kąt 0°; epoka kalendarza wypada 23 VIII 205 p.n.e., 4 miesiące później; w tej epoce Meton pokazuje Phoinikaios roku 1, igrzyska rok 1, saros początek komórki 5 pod kątem około 26°.
+
+**Co zgaduję albo co zostaje niepewne**
+
+- Cała epoka kalendarza to hipoteza Iversena. Opiera się na założeniu, że kreski tarczy igrzysk oznaczają równonoc jesienną. Jones proponuje inną regułę (trzeci miesiąc po przesileniu letnim), która daje tę samą datę. Na fragmentach nie ma odczytu, który by tę datę potwierdzał.
+- Model zaczyna miesiące od średniego nowiu. Iversen zaczyna Phoinikaios 1–3 dni po koniunkcji, od widocznego sierpu. Tej różnicy nie modeluję.
+- W źródłach są dwie niespójności w liczeniu. Jones w akapicie 153 pisze „five months earlier”, a w przypisie 64 „four months”. Carman 2017 w streszczeniu pisze, że Meton zaczyna się cztery miesiące „earlier” niż saros, choć 25 sierpnia wypada po 27 kwietnia. Zgaduję, że Jones liczy włącznie, a u Carmana to pomyłka w słowie; daty w obu tekstach są jednoznaczne.
+- Tarcza exeligmos: Jones (akapit 109) pisze, że początek cyklu exeligmos jest na godzinie 1, żeby w epoce kalendarza wskazówki dolnych tarcz były równoległe. W modelu sektory exeligmos zaczynają się u góry. Tego nie zmieniałem, bo zadanie wyklucza zmiany wyglądu.
 
 ## Źródła
 
@@ -76,7 +103,9 @@ Test sprawdza na ułamkach dokładnych, że liczby zębów dają 254/19 (Księż
 - C. Carman, J. Evans, *On the epoch of the Antikythera mechanism and its eclipse predictor*, Arch. Hist. Exact Sci. 68 (2014).
 - T. Freeth i in., *A Model of the Cosmos in the ancient Greek Antikythera Mechanism*, Scientific Reports 11:5821 (2021), https://www.nature.com/articles/s41598-021-84310-w
 - T. Freeth, *Eclipse prediction on the ancient Greek astronomical calculating machine known as the Antikythera Mechanism*, PLOS ONE 9:e103275 (2014).
-- P. Iversen, *The Calendar on the Antikythera Mechanism and the Corinthian Family of Calendars*, Hesperia 86 (2017).
+- P. Iversen, *The Calendar on the Antikythera Mechanism and the Corinthian Family of Calendars*, Hesperia 86 (2017), s. 129–203.
+- C. C. Carman, *The Final Date of the Antikythera Mechanism*, Journal for the History of Astronomy 48 (2017), s. 312–323 (czytane tylko streszczenie).
+- A. Jones, *The Epoch Dates of the Antikythera Mechanism (With an Appendix on its Authenticity)*, ISAW Papers 17 (2020), http://dlib.nyu.edu/awdl/isaw/isaw-papers/17/
 - J. Meeus, *Astronomical Algorithms*, 2. wyd. (1998).
 
 Strona działa pod `/antykithira/`, więc wszystkie ścieżki są względne. Plik `.nojekyll` wyłącza przetwarzanie przez Jekyll. GitHub Pages trzeba włączyć w ustawieniach repozytorium (gałąź `main`, katalog główny).

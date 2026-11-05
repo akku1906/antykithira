@@ -8,6 +8,7 @@ const eqF = (a, b) => a.n === b.n && a.d === b.d;
 const near = (a, b, eps = 1e-6) => Math.abs(a - b) < eps;
 const angEq = (a, b, eps = 1e-6) => { const d = Math.abs(((a - b) % 360 + 540) % 360 - 180); return d < eps; };
 const G = AM.G;
+const rad = Math.PI / 180;
 
 console.log('1. Przełożenia z liczb zębów (ułamki dokładne)');
 ok(eqF(absF(G.e2.rate), AM.F(254, 19)), 'Księżyc gwiazdowy e2 = 254/19 obr./rok → ' + AM.fstr(absF(G.e2.rate)));
@@ -108,6 +109,27 @@ const agree = SG.filter((g) => (g.lunar || g.solar) && (g.lunar ? g.meeus.lunar 
 console.log(`       zgodność z Meeusem (lunacje od 28 IV 205 p.n.e.): ${agree}/51 glifów potwierdzonych w całości`);
 const nS = AM.SAROS_GLYPHS.filter((g) => g.meeus.solar).length, nL = AM.SAROS_GLYPHS.filter((g) => g.meeus.lunar).length;
 ok(nS >= 35 && nS <= 48 && nL >= 20 && nL <= 34, `saros od 205 p.n.e.: ${nS} zaćmień Słońca, ${nL} Księżyca (cieniowych)`);
+
+console.log('5. Planety w epoce wobec JPL DE441 (test-dane/de441-205pne.json, niezależne od Meeusa)');
+const DE = require('./test-dane/de441-205pne.json');
+ok(near(DE.jd, AM.JD_START, 1e-6), 'dane DE441 dotyczą epoki modelu');
+const dn = (a, b) => ((a - b) % 360 + 540) % 360 - 180;
+const Lde = (el) => AM.norm(el.OM + el.W + el.MA);       // średnia długość oskulacyjna, J2000
+const LE = Lde(DE.elementy.earth), eE = DE.elementy.earth.e, aE = DE.elementy.earth.a;
+const stE = AM.state(AM.JD_START);
+for (const p of AM.PLANETS) {
+  const el = DE.elementy[p.id], g = DE.geo[p.id];
+  // (a) faza synodyczna S0, którą model bierze ze średnich elementów Meeusa; tolerancja 1° pokrywa
+  //     różnicę między długością średnią a oskulacyjną (u Saturna i Jowisza: wielka nierówność)
+  const S0de = p.inner ? AM.norm(Lde(el) - LE) : AM.norm(LE + 180 - Lde(el));
+  const dS = dn(p.S0, S0de);
+  ok(Math.abs(dS) < 1, `${p.id}: faza synodyczna w epoce, model − DE441 = ${dS.toFixed(3)}° (< 1°)`);
+  // (b) długość geocentryczna; model ma orbity kołowe, więc dopuszczam przesunięcie planety i Ziemi
+  //     o 2e·a (rząd równania środka) widziane z odległości delta, plus 1° z punktu (a)
+  const lim = Math.asin(Math.min(1, (2 * el.e * el.a + 2 * eE * aE) / g.delta)) / rad + 1;
+  const dl = dn(stE.planets.find((q) => q.id === p.id).lon, g.lon);
+  ok(Math.abs(dl) < lim, `${p.id}: długość geocentryczna, model − DE441 = ${dl.toFixed(2)}° (granica ${lim.toFixed(1)}° z mimośrodów)`);
+}
 
 console.log(`\n${pass} ok, ${fail} błędów`);
 process.exit(fail ? 1 : 0);

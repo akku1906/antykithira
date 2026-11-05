@@ -1,0 +1,76 @@
+{
+ "_opis": [
+  "Dane referencyjne z JPL Horizons (efemeryda DE441), pobrane 2026-11-05 przez https://ssd.jpl.nasa.gov/api/horizons.api.",
+  "Niezależne od średnich elementów Meeusa, z których model bierze położenia startowe planet.",
+  "jd: epoka sarosu w modelu (AM.JD_START), średni nów 27/28 IV 205 p.n.e.; traktowana jako TT/TDB.",
+  "elementy: heliocentryczne elementy oskulacyjne, ekliptyka i równonoc J2000 (REF_PLANE=ECLIPTIC, REF_SYSTEM=J2000, CENTER=500@10, czas TDB); dla Ziemi barycentrum Ziemia–Księżyc (3), dla Marsa, Jowisza i Saturna barycentra układów (4, 5, 6). L = OM + W + MA.",
+  "geo: pozorna długość geocentryczna w ekliptyce daty (QUANTITIES=31, ObsEcLon, IAU76/80) i odległość delta w au (QUANTITIES=20), CENTER=500@399, TIME_TYPE=TT. Dla Marsa, Jowisza i Saturna barycentra układów, bo Horizons nie podaje ciał centralnych przed 1600 r."
+ ],
+ "jd": 1646664.367664584,
+ "elementy": {
+  "mercury": {
+   "e": 0.20516837485842,
+   "a": 0.3870981499752021,
+   "OM": 51.05432991741561,
+   "W": 22.89426588247107,
+   "MA": 334.0609737943293
+  },
+  "venus": {
+   "e": 0.007872080395000905,
+   "a": 0.7233250618553125,
+   "OM": 82.74105060401939,
+   "W": 47.84631614168838,
+   "MA": 47.60015064582351
+  },
+  "earth": {
+   "e": 0.01753899330071055,
+   "a": 1.000002767230031,
+   "OM": 0.2033439773011469,
+   "W": 95.72065298141786,
+   "MA": 146.8535222651321
+  },
+  "mars": {
+   "e": 0.09133630306560632,
+   "a": 1.523788710629319,
+   "OM": 55.76392052558467,
+   "W": 270.449541701765,
+   "MA": 165.3319437772794
+  },
+  "jupiter": {
+   "e": 0.04471081575876693,
+   "a": 5.204643654230415,
+   "OM": 97.06121204395299,
+   "W": 273.4153561255909,
+   "MA": 105.5897891409877
+  },
+  "saturn": {
+   "e": 0.06593721087650485,
+   "a": 9.583239212230371,
+   "OM": 119.210706225175,
+   "W": 324.2271192152726,
+   "MA": 35.12041066060696
+  }
+ },
+ "geo": {
+  "mercury": {
+   "delta": 1.30376807074908,
+   "lon": 26.3962477
+  },
+  "venus": {
+   "delta": 0.96527479695394,
+   "lon": 75.6834877
+  },
+  "mars": {
+   "delta": 2.2205303613612,
+   "lon": 77.8261539
+  },
+  "jupiter": {
+   "delta": 5.89039276541847,
+   "lon": 81.9642527
+  },
+  "saturn": {
+   "delta": 9.63829510347789,
+   "lon": 87.3754735
+  }
+ }
+}

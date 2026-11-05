@@ -37,7 +37,7 @@
   let drag = null;
   cv.addEventListener('pointerdown', (e) => {
     const p = local(e);
-    drag = { a: Math.atan2(p.y - center.cy, p.x - center.cx) };
+    drag = { a: Math.atan2(p.y - center.cy, p.x - center.cx), x0: p.x, y0: p.y, moved: 0 };
     cv.setPointerCapture(e.pointerId); cv.classList.add('drag');
   });
   cv.addEventListener('pointermove', (e) => {
@@ -46,11 +46,16 @@
     const a = Math.atan2(p.y - center.cy, p.x - center.cx);
     let da = a - drag.a;
     if (da > Math.PI) da -= 2 * Math.PI; if (da < -Math.PI) da += 2 * Math.PI;
-    drag.a = a;
+    drag.a = a; drag.moved = Math.max(drag.moved, Math.hypot(p.x - drag.x0, p.y - drag.y0));
     setJd(jd + (da / (2 * Math.PI)) * AM.Y);
   });
   const end = () => { drag = null; cv.classList.remove('drag'); };
-  cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', end);
+  cv.addEventListener('pointerup', (e) => {
+    // dotknięcie bez przeciągania: widok może je obsłużyć (np. powiększenie platformy e3)
+    const V = window.Views[view];
+    if (drag && drag.moved < 6 && V && V.tap) { const p = local(e); if (V.tap(p.x, p.y)) dirty = true; }
+    end();
+  }); cv.addEventListener('pointercancel', end);
   cv.addEventListener('wheel', (e) => { e.preventDefault(); setJd(jd + Math.sign(e.deltaY) * (e.shiftKey ? AM.MONTH : 1)); }, { passive: false });
   function local(e) { const r = cv.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; }
 
@@ -101,6 +106,7 @@
     else if (k === 't') setJd(AM.jdNow());
     else if (k === 's') setJd(AM.JD_START);
     else if (k === 'd') $('#theme').click();
+    else if (k === 'z' && view === 'inside') { window.Views.inside.toggleZoom(); dirty = true; }
   });
 
   // ---------- rozmiar płótna ----------

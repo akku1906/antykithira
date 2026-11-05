@@ -33,13 +33,15 @@ ok(angEq(s.saros.angle, s0.saros.angle), 'kąt wskazówki sarosu = startowy (4 p
 ok(s.exeligmos.sector === 1, 'po 1 sarosie exeligmos w sektorze 2 (+8 h)');
 s = AM.state(j0 + 669 * M);
 ok(s.exeligmos.sector === 0 && angEq(s.exeligmos.angle, 0), 'po 669 mies. exeligmos wraca do startu');
+const jm = AM.JD_METON, sm0 = AM.state(jm);        // epoka kalendarza (Meton, Kalippos, igrzyska)
+s = AM.state(jm + 235 * M);
+ok(s.metonic.cell === 0 && sm0.metonic.cell === 0 && s.metonic.turn === 0, 'po 235 mies. od epoki kalendarza Meton w komórce 1, zwój 1');
 s = AM.state(j0 + 235 * M);
-ok(s.metonic.cell === s0.metonic.cell && s.metonic.turn === 0, 'po 235 mies. Meton w komórce 1, zwój 1');
 ok(angEq(s.moonMean, s0.moonMean, 1e-6), 'po 19 latach (254 mies. gwiazdowe) Księżyc średni w tym samym miejscu');
 ok(angEq(s.sunMean, s0.sunMean), 'po 19 latach Słońce średnie w tym samym miejscu');
-ok(s.callippic.sector === 1, 'po 19 latach tarcza Kalipposa w sektorze 2');
-s = AM.state(j0 + 940 * M);
-ok(angEq(s.callippic.angle, s0.callippic.angle) && s.callippic.sector === 0, 'po 76 latach (940 mies.) Kalippos wraca');
+ok(AM.state(jm + 19 * AM.Y).callippic.sector === 1, 'po 19 latach od epoki kalendarza tarcza Kalipposa w sektorze 2');
+s = AM.state(jm + 940 * M);
+ok(angEq(s.callippic.angle, sm0.callippic.angle) && s.callippic.sector === 0, 'po 76 latach (940 mies.) Kalippos wraca');
 s = AM.state(j0 + 4 * AM.Y);
 ok(s.games.year === s0.games.year && angEq(s.games.angle, s0.games.angle), 'po 4 latach tarcza igrzysk wraca');
 s = AM.state(j0 + 2 * AM.Y);
@@ -74,6 +76,18 @@ const e0 = AM.egyptian(AM.EG_EPOCH);
 ok(e0.month === 0 && e0.day === 1, 'w epoce Nabonassara jest 1 Thoth');
 const c = AM.calFromJd(AM.JD_START, false);
 ok(c.y === -204 && c.m === 4 && Math.abs(c.d - 28) <= 1, `start = ${c.d}.${c.m}.${1 - c.y} p.n.e. (nów ≈ 28 IV 205 p.n.e.)`);
+console.log('3b. Epoki tarcz tylnych (Iversen 2017, s. 181–183; Jones 2020, ISAW Papers 17)');
+const st0 = AM.state(AM.JD_START);
+ok(st0.saros.cell === 0 && angEq(st0.saros.angle, 0), 'epoka sarosu: komórka 1, wskazówka u góry (kąt 0°)');
+const cm = AM.calFromJd(AM.JD_METON, false);
+ok(cm.y === -204 && cm.m === 8 && Math.abs(cm.d + cm.frac - 23.5) <= 1, `epoka kalendarza = nów ${cm.d}.${cm.m}.${1 - cm.y} p.n.e. (Iversen: 23 VIII 205 p.n.e.)`);
+ok(near(AM.JD_METON - AM.JD_START, 4 * AM.MONTH, 1e-9) && near(AM.JD_METON, AM.meanNewMoon(AM.K_METON), 0.01), 'epoka kalendarza = epoka sarosu + 4 miesiące mechanizmu (≈ nów astronomiczny, różnica < 0,01 d)');
+const stM = AM.state(AM.JD_METON + 1e-6);
+ok(stM.metonic.cell === 0 && stM.metonic.info.name === 'ΦΟΙΝΙΚΑΙΟΣ' && stM.metonic.info.year === 1, 'w epoce kalendarza Meton: komórka 1 = Phoinikaios roku 1 (wskazówka w dół)');
+ok(stM.games.year === 0 && angEq(stM.games.angle, 0, 1e-4), 'w epoce kalendarza igrzyska: rok 1 (Istmia + Olimpia)');
+ok(stM.saros.cell === 4 && near(stM.saros.pos, 4, 1e-4), 'w epoce kalendarza saros na początku komórki 5 (Iversen 2017, ryc. 12)');
+ok(Math.abs(stM.saros.angle - 26) < 1, `kąt sarosu w epoce kalendarza ${stM.saros.angle.toFixed(1)}° ≈ 26° (Jones 2020, przyp. 64)`);
+ok(st0.metonic.cell === 231, 'w epoce sarosu Meton w komórce 232 poprzedniego cyklu');
 const eg = AM.egyptian(AM.JD_START);
 console.log(`       start w kal. egipskim: ${eg.day} ${AM.EG_MONTHS_PL[eg.month]}`);
 

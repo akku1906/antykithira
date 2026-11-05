@@ -134,6 +134,13 @@
   const meanNewMoon = (k) => LUN0 + SYN_TRUE * k;
   const K_START = kNear(jdFromCal(-204, 4, 28));
   const JD_START = meanNewMoon(K_START);
+  // Epoka kalendarza (spirala Metona, igrzyska, Kalippos) jest o 4 miesiące późniejsza:
+  // Phoinikaios 1 roku 1 zaczyna się tuż po nowiu 23 VIII 205 p.n.e., a wskazówka sarosu
+  // stoi wtedy na początku komórki 5 (Iversen 2017, Hesperia 86, s. 181–183 i ryc. 12;
+  // tak samo Carman 2017 i Jones 2020, ISAW Papers 17, przyp. 64).
+  const METON_OFFSET = 4;
+  const K_METON = K_START + METON_OFFSET;
+  const JD_METON = JD_START + METON_OFFSET * MONTH;      // wskazówki są sprzężone kołami: 4 miesiące mechanizmu
 
   // ---------- średnie elementy (Meeus) w chwili startu – kalibracja ----------
   const norm = (a) => ((a % 360) + 360) % 360;
@@ -282,11 +289,12 @@
     });
 
     // miesiące liczone okresem mechanizmu od nowiu startowego
-    const months = days / MONTH;
-    const mm = ((months % 235) + 235) % 235;
+    const months = days / MONTH;                        // od epoki sarosu
+    const monthsMet = months - METON_OFFSET;            // od epoki kalendarza (4 miesiące później)
+    const mm = ((monthsMet % 235) + 235) % 235;
     const metCell = Math.floor(mm);
-    const met = { months, pos: mm, cell: metCell, turn: Math.floor(mm / 47), angle: (mm / 47) * 360, info: METONIC_CELLS[metCell] };
-    const yearsMet = months * 19 / 235;                 // lata Metona (= obroty b1)
+    const met = { months: monthsMet, pos: mm, cell: metCell, turn: Math.floor(mm / 47), angle: (mm / 47) * 360, info: METONIC_CELLS[metCell] };
+    const yearsMet = monthsMet * 19 / 235;              // lata Metona (= obroty b1) od epoki kalendarza
     const callippic = { angle: norm((yearsMet / 76) * 360), sector: Math.floor((((yearsMet % 76) + 76) % 76) / 19) };
     const gy = Math.floor(((yearsMet % 4) + 4) % 4);
     const games = { angle: norm((yearsMet / 4) * 360), year: gy, names: GAMES_PL[gy] };
@@ -321,7 +329,7 @@
     F, fmul, fdiv, fsub, fstr, Y, MONTH, GEARS, G, PLANETS, NODES,
     R_SIDEREAL, R_APSIDES, R_ANOMALY, R_SYNODIC,
     jdFromCal, calFromJd, egyptian, EG_MONTHS, EG_MONTHS_PL, EG_EPOCH,
-    JD_START, K_START, meanNewMoon, kNear, eclipseAt, SAROS_GLYPHS, OBSERVED_GLYPHS, METONIC_CELLS, EXCLUDED, GAMES, GAMES_PL, GAMES_UNCERTAIN,
+    JD_START, K_START, JD_METON, K_METON, METON_OFFSET, meanNewMoon, kNear, eclipseAt, SAROS_GLYPHS, OBSERVED_GLYPHS, METONIC_CELLS, EXCLUDED, GAMES, GAMES_PL, GAMES_UNCERTAIN,
     state, jdNow, pinSlot, E_MOON, E_SUN, norm
   };
 });

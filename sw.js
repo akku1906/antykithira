@@ -1,7 +1,7 @@
 // Service worker: najpierw pamięć podręczna, w tle odświeżenie.
 // Nowa wersja (nowy CACHE) instaluje się i czeka, aż użytkownik kliknie „Odśwież” na pasku
 // „Jest nowa wersja” – wtedy strona wysyła {type: 'skipWaiting'} i przeładowuje się po zmianie kontrolera.
-const CACHE = 'antykithira-v10';
+const CACHE = 'antykithira-v11';
 const ASSETS = ['./', 'index.html', 'style.css', 'manifest.webmanifest', 'icon.svg',
   'js/engine.js', 'js/draw.js', 'js/front.js', 'js/back.js', 'js/inside.js', 'js/app.js'];
 self.addEventListener('install', (e) => {

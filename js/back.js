@@ -84,17 +84,17 @@
     ctx.beginPath(); ctx.arc(x, y, g.pitch * 0.12, 0, 2 * Math.PI); ctx.fillStyle = P.dark; ctx.fill();
     D.ball(ctx, g.cx, g.cy, R * 0.035, P.brass);
   }
-  function subDial(ctx, x, y, r, labels, angle, P, fs, title, rot = 0) {
+  function subDial(ctx, x, y, r, labels, angle, P, fs, title) {
     ctx.beginPath(); ctx.arc(x, y, r, 0, 2 * Math.PI);
     ctx.fillStyle = D.metal(ctx, x, y, r, D.shade(P.brass, 0.1), P.brass2); ctx.fill();
     ctx.strokeStyle = P.dark; ctx.lineWidth = 1; ctx.stroke();
     const n = labels.length;
     for (let i = 0; i < n; i++) {
-      const a = rot + i * 360 / n;                        // rot: kąt pierwszej kreski podziału
+      const a = i * 360 / n;
       const [x1, y1] = D.pt(x, y, r * 0.2, a), [x2, y2] = D.pt(x, y, r, a);
       ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
       let lines = [].concat(labels[i]);
-      if (lines.length > 1 && fs * 0.62 < 7) lines = [GREEK_NUM[i] || lines[0]];   // na małym ekranie tylko numer roku
+      if (lines.length > 1 && fs * 0.62 < 7) lines = [GREEK_NUM[i] || lines[0]];   // igrzyska: na małym ekranie tylko numer roku
       lines.forEach((t, k) => D.arcText(ctx, t, x, y, r * (0.78 - k * 0.22), a + 180 / n, fs * (k ? 0.62 : 0.72), P.text));
     }
     D.pointer(ctx, x, y, angle, 0, r * 0.95, P.dark, P.brass, Math.max(1.5, r * 0.04));
@@ -103,6 +103,26 @@
       ctx.font = `${fs * 0.7}px Georgia, serif`; ctx.textAlign = 'center'; ctx.fillStyle = P.text;
       ctx.fillText(title, x, y + r + fs * 0.75);
     }
+  }
+
+  // Tarcza exeligmos: kreski od EXELIGMOS_START co 120°, w sektorach liczby z tarczy (pusty, Η, ΙϚ).
+  // Rozmiar liczb zależy od promienia tarczy, a nie od fs, żeby były czytelne także na 412 px;
+  // współczesny dopisek „+8 h” pokazujemy tylko wtedy, gdy ma co najmniej 7 px.
+  function exeligmosDial(ctx, x, y, r, angle, P) {
+    ctx.beginPath(); ctx.arc(x, y, r, 0, 2 * Math.PI);
+    ctx.fillStyle = D.metal(ctx, x, y, r, D.shade(P.brass, 0.1), P.brass2); ctx.fill();
+    ctx.strokeStyle = P.dark; ctx.lineWidth = 1; ctx.stroke();
+    const numSize = Math.max(11, r * 0.36), subSize = r * 0.17;
+    AM.EXELIGMOS_SECTORS.forEach((s, i) => {
+      const a = AM.EXELIGMOS_START + i * 120;
+      const [x1, y1] = D.pt(x, y, r * 0.2, a), [x2, y2] = D.pt(x, y, r, a);
+      ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+      const num = s.alt && !D.hasGlyph('\u03DA') ? s.alt : s.num;
+      if (num) D.arcText(ctx, num, x, y, r * 0.7, a + 60, numSize, P.text);
+      if (subSize >= 7) D.arcText(ctx, (s.hours ? '+' : '') + s.hours + ' h', x, y, r * 0.42, a + 60, subSize, P.text);
+    });
+    D.pointer(ctx, x, y, angle, 0, r * 0.95, P.dark, P.brass, Math.max(1.5, r * 0.04));
+    ctx.beginPath(); ctx.arc(x, y, r * 0.07, 0, 7); ctx.fillStyle = P.dark; ctx.fill();
   }
 
   function draw(ctx, W, H, st, P) {
@@ -138,7 +158,7 @@
     const gl = AM.SAROS_GLYPHS;
     drawSpiral(ctx, gs, P, fs, null, (i) => (gl[i].lunar || gl[i].solar)
       ? { txt: (gl[i].lunar ? 'Σ' : '') + (gl[i].solar ? 'Η' : ''), observed: gl[i].observed } : null, st.saros.cell);
-    subDial(ctx, cx, cyS, R * 0.24, [['', '0 h'], ['Η', '+8 h'], ['Ις', '+16 h']], st.exeligmos.angle, P, fs, null, AM.EXELIGMOS_START);
+    exeligmosDial(ctx, cx, cyS, R * 0.24, st.exeligmos.angle, P);
     spiralPointer(ctx, gs, st.saros.pos, P, R);
     capt('ΣΑΡΟΣ · 223 miesiące · exeligmos', cyS + R + fs * 1.0);
     const lf = Math.max(9, fs * 0.65);

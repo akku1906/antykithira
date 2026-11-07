@@ -158,6 +158,14 @@
   // W epoce sarosu wskazówka stoi więc na 30°, a w epoce kalendarza na ≈ 32°, prawie równolegle
   // do wskazówki sarosu (≈ 26°, przyp. 64).
   const EXELIGMOS_START = 30;
+  // Sektory tarczy exeligmos zgodnie z ruchem wskazówek od godziny 1 (Jones 2020, akapit 41):
+  // pusty (cykl bazowy, 0 h), Η = 8, ΙϚ = 16 (Ϛ to stigma, U+03DA, nie końcowa sigma ς).
+  // alt: zapis bez stigmy (ΣΤ to ligatura, z której stigma powstała), gdy czcionka nie ma Ϛ.
+  const EXELIGMOS_SECTORS = [
+    { num: '', hours: 0 },
+    { num: 'Η', hours: 8 },
+    { num: 'Ι\u03DA', hours: 16, alt: 'ΙΣΤ' }
+  ];
   const K_METON = K_START + METON_OFFSET;
   const JD_METON = JD_START + METON_OFFSET * MONTH;      // wskazówki są sprzężone kołami: 4 miesiące mechanizmu
 
@@ -382,7 +390,7 @@
     F, fmul, fdiv, fsub, fstr, Y, MONTH, GEARS, G, PLANETS, NODES,
     R_SIDEREAL, R_APSIDES, R_ANOMALY, R_SYNODIC,
     jdFromCal, calFromJd, egyptian, EG_MONTHS, EG_MONTHS_PL, EG_EPOCH,
-    JD_START, K_START, JD_METON, K_METON, METON_OFFSET, EXELIGMOS_START, meanNewMoon, kNear, eclipseAt, SAROS_GLYPHS, OBSERVED_GLYPHS, METONIC_CELLS, EXCLUDED, GAMES, GAMES_PL, GAMES_UNCERTAIN,
+    JD_START, K_START, JD_METON, K_METON, METON_OFFSET, EXELIGMOS_START, EXELIGMOS_SECTORS, meanNewMoon, kNear, eclipseAt, SAROS_GLYPHS, OBSERVED_GLYPHS, METONIC_CELLS, EXCLUDED, GAMES, GAMES_PL, GAMES_UNCERTAIN,
     state, jdNow, slotAngle, lunarTrain, E_MOON, R_PIN, D_K, E_SUN, norm, relRate
   };
 });

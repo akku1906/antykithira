@@ -35,6 +35,21 @@
     return gr;
   };
 
+  // Czy jakaś czcionka w systemie ma znak ch? Porównujemy piksele ze znakiem nieprzypisanym (U+0378),
+  // który zawsze rysuje się jako „pusty prostokąt” (.notdef). Bez płótna 2D zakładamy, że jest.
+  const glyphCache = {};
+  D.hasGlyph = function (ch) {
+    if (ch in glyphCache) return glyphCache[ch];
+    let ok = true;
+    try {
+      const c = document.createElement('canvas'); c.width = c.height = 40;
+      const x = c.getContext('2d', { willReadFrequently: true });
+      const px = (s) => { x.clearRect(0, 0, 40, 40); x.font = '30px "Palatino Linotype", Palatino, Georgia, serif'; x.textBaseline = 'top'; x.fillText(s, 4, 4); return x.getImageData(0, 0, 40, 40).data.join(); };
+      ok = px(ch) !== px('\u0378');
+    } catch (e) { /* zostaje true */ }
+    return (glyphCache[ch] = ok);
+  };
+
   // tekst po łuku, wyśrodkowany na kącie deg
   D.arcText = function (ctx, text, cx, cy, r, deg, size, color, inward) {
     ctx.save();

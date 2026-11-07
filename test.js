@@ -159,6 +159,14 @@ ok(Math.abs(stM.saros.angle - 26) < 1, `kąt sarosu w epoce kalendarza ${stM.sar
 ok(AM.EXELIGMOS_START === 30 && st0.exeligmos.sector === 0 && angEq(st0.exeligmos.angle, 30), 'epoka sarosu: exeligmos na początku sektora 0 h, wskazówka na godzinie 1 (30°; Jones 2020, akapit 41)');
 ok(angEq(AM.state(AM.JD_START + 223 * AM.MONTH + 1e-6).exeligmos.angle, 150, 1e-4) && angEq(AM.state(AM.JD_START + 446 * AM.MONTH + 1e-6).exeligmos.angle, 270, 1e-4), 'granice sektorów +8 h i +16 h na godzinach 5 i 9 (150°, 270°)');
 ok(Math.abs(stM.exeligmos.angle - 32) < 0.5 && Math.abs(stM.exeligmos.angle - stM.saros.angle) < 7, `w epoce kalendarza exeligmos ${stM.exeligmos.angle.toFixed(1)}° ≈ 32°, saros ${stM.saros.angle.toFixed(1)}°: wskazówki dolnych tarcz prawie równoległe (Jones 2020, akapit 109, przyp. 64)`);
+{
+  const ES = AM.EXELIGMOS_SECTORS;
+  ok(ES.length === 3 && ES.map((s) => s.hours).join() === '0,8,16', 'exeligmos: sektory 0, +8, +16 h zgodnie z ruchem wskazówek od godziny 1');
+  ok(ES[0].num === '' && ES[1].num === '\u0397' && ES[2].num === '\u0399\u03DA', 'oznaczenia z tarczy (Jones 2020, akapit 41): pusty, Η (eta, 8), ΙϚ (iota + stigma U+03DA, 16) – nie ς ani Α/Β/Γ');
+  ok(ES[2].alt === '\u0399\u03A3\u03A4' && !ES.some((s) => /[\u03C2\u0391\u0392\u0393]/.test(s.num + (s.alt || ''))), 'zapis zastępczy bez stigmy: ΙΣΤ; nigdzie końcowej sigmy ani numerów Α/Β/Γ');
+  const sec = (m) => AM.state(AM.JD_START + m * AM.MONTH + 1e-6).exeligmos.sector;
+  ok(sec(0) === 0 && sec(223) === 1 && sec(446) === 2 && ES[sec(300)].num === 'Η', 'stan.sector wskazuje właściwy wpis tabeli (miesiąc 300 → Η)');
+}
 ok(st0.metonic.cell === 231, 'w epoce sarosu Meton w komórce 232 poprzedniego cyklu');
 const eg = AM.egyptian(AM.JD_START);
 console.log(`       start w kal. egipskim: ${eg.day} ${AM.EG_MONTHS_PL[eg.month]}`);

@@ -84,13 +84,13 @@
     ctx.beginPath(); ctx.arc(x, y, g.pitch * 0.12, 0, 2 * Math.PI); ctx.fillStyle = P.dark; ctx.fill();
     D.ball(ctx, g.cx, g.cy, R * 0.035, P.brass);
   }
-  function subDial(ctx, x, y, r, labels, angle, P, fs, title) {
+  function subDial(ctx, x, y, r, labels, angle, P, fs, title, rot = 0) {
     ctx.beginPath(); ctx.arc(x, y, r, 0, 2 * Math.PI);
     ctx.fillStyle = D.metal(ctx, x, y, r, D.shade(P.brass, 0.1), P.brass2); ctx.fill();
     ctx.strokeStyle = P.dark; ctx.lineWidth = 1; ctx.stroke();
     const n = labels.length;
     for (let i = 0; i < n; i++) {
-      const a = i * 360 / n;
+      const a = rot + i * 360 / n;                        // rot: kąt pierwszej kreski podziału
       const [x1, y1] = D.pt(x, y, r * 0.2, a), [x2, y2] = D.pt(x, y, r, a);
       ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
       let lines = [].concat(labels[i]);
@@ -138,7 +138,7 @@
     const gl = AM.SAROS_GLYPHS;
     drawSpiral(ctx, gs, P, fs, null, (i) => (gl[i].lunar || gl[i].solar)
       ? { txt: (gl[i].lunar ? 'Σ' : '') + (gl[i].solar ? 'Η' : ''), observed: gl[i].observed } : null, st.saros.cell);
-    subDial(ctx, cx, cyS, R * 0.24, [['', '0 h'], ['Η', '+8 h'], ['Ις', '+16 h']], st.exeligmos.angle, P, fs, null);
+    subDial(ctx, cx, cyS, R * 0.24, [['', '0 h'], ['Η', '+8 h'], ['Ις', '+16 h']], st.exeligmos.angle, P, fs, null, AM.EXELIGMOS_START);
     spiralPointer(ctx, gs, st.saros.pos, P, R);
     capt('ΣΑΡΟΣ · 223 miesiące · exeligmos', cyS + R + fs * 1.0);
     const lf = Math.max(9, fs * 0.65);

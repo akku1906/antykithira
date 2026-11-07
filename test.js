@@ -101,7 +101,7 @@ ok(s.saros.turn === s0.saros.turn && s.saros.cell === s0.saros.cell, 'ślizgacz 
 ok(angEq(s.saros.angle, s0.saros.angle), 'kąt wskazówki sarosu = startowy (4 pełne obroty)');
 ok(s.exeligmos.sector === 1, 'po 1 sarosie exeligmos w sektorze 2 (+8 h)');
 s = AM.state(j0 + 669 * M);
-ok(s.exeligmos.sector === 0 && angEq(s.exeligmos.angle, 0), 'po 669 mies. exeligmos wraca do startu');
+ok(s.exeligmos.sector === 0 && angEq(s.exeligmos.angle, s0.exeligmos.angle), 'po 669 mies. exeligmos wraca do startu');
 const jm = AM.JD_METON, sm0 = AM.state(jm);        // epoka kalendarza (Meton, Kalippos, igrzyska)
 s = AM.state(jm + 235 * M);
 ok(s.metonic.cell === 0 && sm0.metonic.cell === 0 && s.metonic.turn === 0, 'po 235 mies. od epoki kalendarza Meton w komórce 1, zwój 1');
@@ -156,6 +156,9 @@ ok(stM.metonic.cell === 0 && stM.metonic.info.name === 'ΦΟΙΝΙΚΑΙΟΣ' &&
 ok(stM.games.year === 0 && angEq(stM.games.angle, 0, 1e-4), 'w epoce kalendarza igrzyska: rok 1 (Istmia + Olimpia)');
 ok(stM.saros.cell === 4 && near(stM.saros.pos, 4, 1e-4), 'w epoce kalendarza saros na początku komórki 5 (Iversen 2017, ryc. 12)');
 ok(Math.abs(stM.saros.angle - 26) < 1, `kąt sarosu w epoce kalendarza ${stM.saros.angle.toFixed(1)}° ≈ 26° (Jones 2020, przyp. 64)`);
+ok(AM.EXELIGMOS_START === 30 && st0.exeligmos.sector === 0 && angEq(st0.exeligmos.angle, 30), 'epoka sarosu: exeligmos na początku sektora 0 h, wskazówka na godzinie 1 (30°; Jones 2020, akapit 41)');
+ok(angEq(AM.state(AM.JD_START + 223 * AM.MONTH + 1e-6).exeligmos.angle, 150, 1e-4) && angEq(AM.state(AM.JD_START + 446 * AM.MONTH + 1e-6).exeligmos.angle, 270, 1e-4), 'granice sektorów +8 h i +16 h na godzinach 5 i 9 (150°, 270°)');
+ok(Math.abs(stM.exeligmos.angle - 32) < 0.5 && Math.abs(stM.exeligmos.angle - stM.saros.angle) < 7, `w epoce kalendarza exeligmos ${stM.exeligmos.angle.toFixed(1)}° ≈ 32°, saros ${stM.saros.angle.toFixed(1)}°: wskazówki dolnych tarcz prawie równoległe (Jones 2020, akapit 109, przyp. 64)`);
 ok(st0.metonic.cell === 231, 'w epoce sarosu Meton w komórce 232 poprzedniego cyklu');
 const eg = AM.egyptian(AM.JD_START);
 console.log(`       start w kal. egipskim: ${eg.day} ${AM.EG_MONTHS_PL[eg.month]}`);

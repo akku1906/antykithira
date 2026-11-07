@@ -153,6 +153,11 @@
   // stoi wtedy na początku komórki 5 (Iversen 2017, Hesperia 86, s. 181–183 i ryc. 12;
   // tak samo Carman 2017 i Jones 2020, ISAW Papers 17, przyp. 64).
   const METON_OFFSET = 4;
+  // Tarcza exeligmos: kreski podziału na godzinach 1, 5 i 9; cykl (sektor pusty, 0 h) zaczyna się
+  // przy wskazówce na godzinie 1, czyli 30° w prawo od góry (Jones 2020, ISAW Papers 17, akapit 41 i 109).
+  // W epoce sarosu wskazówka stoi więc na 30°, a w epoce kalendarza na ≈ 32°, prawie równolegle
+  // do wskazówki sarosu (≈ 26°, przyp. 64).
+  const EXELIGMOS_START = 30;
   const K_METON = K_START + METON_OFFSET;
   const JD_METON = JD_START + METON_OFFSET * MONTH;      // wskazówki są sprzężone kołami: 4 miesiące mechanizmu
 
@@ -349,7 +354,7 @@
     const sCell = Math.floor(sm);
     const saros = { pos: sm, cell: sCell, turn: Math.floor(sm / 55.75), angle: (sm / 55.75) * 360, glyph: SAROS_GLYPHS[sCell] };
     const ex = ((months % 669) + 669) % 669;
-    const exeligmos = { angle: (ex / 669) * 360, sector: Math.floor(ex / 223) };
+    const exeligmos = { angle: norm(EXELIGMOS_START + (ex / 669) * 360), sector: Math.floor(ex / 223) };
 
     // dryf: ile mechanizm (rok 365¼ d, relacje Metona) odbiega od współczesnych średnich elementów
     const T = (jd - 2451545) / 36525;
@@ -377,7 +382,7 @@
     F, fmul, fdiv, fsub, fstr, Y, MONTH, GEARS, G, PLANETS, NODES,
     R_SIDEREAL, R_APSIDES, R_ANOMALY, R_SYNODIC,
     jdFromCal, calFromJd, egyptian, EG_MONTHS, EG_MONTHS_PL, EG_EPOCH,
-    JD_START, K_START, JD_METON, K_METON, METON_OFFSET, meanNewMoon, kNear, eclipseAt, SAROS_GLYPHS, OBSERVED_GLYPHS, METONIC_CELLS, EXCLUDED, GAMES, GAMES_PL, GAMES_UNCERTAIN,
+    JD_START, K_START, JD_METON, K_METON, METON_OFFSET, EXELIGMOS_START, meanNewMoon, kNear, eclipseAt, SAROS_GLYPHS, OBSERVED_GLYPHS, METONIC_CELLS, EXCLUDED, GAMES, GAMES_PL, GAMES_UNCERTAIN,
     state, jdNow, slotAngle, lunarTrain, E_MOON, R_PIN, D_K, E_SUN, norm, relRate
   };
 });

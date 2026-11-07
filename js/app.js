@@ -196,7 +196,31 @@
   setView(window.Views[savedView] || savedView === 'about' ? savedView : 'front');
   requestAnimationFrame(loop);
 
+  // Service worker i pasek „Jest nowa wersja”: nowy SW czeka (waiting), dopóki użytkownik
+  // nie kliknie „Odśwież”; wtedy skipWaiting, a po zmianie kontrolera przeładowanie strony.
   if ('serviceWorker' in navigator && location.protocol !== 'file:') {
-    navigator.serviceWorker.register('sw.js').catch(() => { /* offline nie zadziała, strona tak */ });
+    let wantsReload = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (wantsReload) { wantsReload = false; location.reload(); }
+    });
+    const showUpdate = (worker) => {
+      const bar = document.getElementById('update');
+      const btn = bar.querySelector('button');
+      bar.hidden = false;
+      btn.disabled = false;
+      btn.onclick = () => { wantsReload = true; btn.disabled = true; worker.postMessage({ type: 'skipWaiting' }); };
+    };
+    navigator.serviceWorker.register('sw.js').then((reg) => {
+      // bez kontrolera to pierwsza instalacja – nie ma starej wersji do zastąpienia
+      const check = () => { if (reg.waiting && navigator.serviceWorker.controller) showUpdate(reg.waiting); };
+      // nowa wersja mogła zacząć się instalować, zanim register() się rozstrzygnął (updatefound już minął)
+      const track = (w) => { if (w) w.addEventListener('statechange', () => { if (w.state === 'installed') check(); }); };
+      check();
+      track(reg.installing);
+      reg.addEventListener('updatefound', () => track(reg.installing));
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') reg.update().catch(() => {});
+      });
+    }).catch(() => { /* offline nie zadziała, strona tak */ });
   }
 })();

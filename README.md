@@ -9,7 +9,7 @@ Działający model greckiego kalkulatora astronomicznego z II/I wieku p.n.e. Kr�
 - **Wnętrze:** rozsunięty schemat 35 kół (korba a1, b1…i1 oraz tor księżycowy e5, k1, k2, e6, e1, b3) obracających się razem z korbą. Na platformie e3 widać kołek k1 w szczelinie k2; dotknięcie e3 (albo klawisz `Z`) powiększa platformę i pokazuje, o ile k2 wyprzedza k1 albo zostaje za nim. Pod schematem jest lista przekładni planetarnych i toru księżycowego.
 - **Co to jest?:** krótki opis znaleziska i źródeł.
 
-Skróty klawiszowe: `1`/`2`/`3`/`4` — widoki; `←`/`→` — dzień; `↑`/`↓` — miesiąc; `PageUp`/`PageDown` — rok; spacja — start/stop; `T` — dzisiaj; `S` — start w 205 p.n.e.; `D` — tryb jasny/ciemny; `Z` — w widoku „Wnętrze” powiększenie platformy e3. Działa offline po pierwszym wczytaniu (service worker).
+Skróty klawiszowe: `1`/`2`/`3`/`4` — widoki; `←`/`→` — dzień; `↑`/`↓` — miesiąc; `PageUp`/`PageDown` — rok; spacja — start/stop; `T` — dzisiaj; `S` — start w 205 p.n.e.; `D` — tryb jasny/ciemny; `Z` — w widoku „Wnętrze” powiększenie platformy e3. Działa offline po pierwszym wczytaniu (service worker). Po wdrożeniu nowej wersji pierwsze otwarcie strony pokazuje jeszcze wersję z pamięci podręcznej; gdy nowa wersja się zainstaluje, u góry pojawia się pasek „Jest nowa wersja, odśwież.” — przycisk „Odśwież” aktywuje nowy service worker (`skipWaiting`) i przeładowuje stronę.
 
 ## Uruchomienie i test
 

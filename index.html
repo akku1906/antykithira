@@ -44,6 +44,11 @@
       <div id="d-greg" class="sub"></div>
       <div id="d-egypt" class="sub"></div>
     </div>
+    <section id="sky" class="sky" hidden aria-label="Mechanizm a niebo">
+      <h3>Mechanizm a niebo</h3>
+      <dl id="sky-out"></dl>
+      <p class="note">To dryf cyklu Metona, a nie błąd modelu. Mechanizm liczy miesiąc jako 19 lat / 235 = 29,53085 dnia, o około 22,65 s dłużej niż rzeczywisty miesiąc, więc z każdym miesiącem od 205 p.n.e. zostaje trochę w tyle. Tak samo zachowywał się oryginał.</p>
+    </section>
     <dl id="readout"></dl>
   </aside>
 </main>
@@ -69,6 +74,12 @@
     </select>
     <button id="today" title="Dzisiaj (T)">Dzisiaj</button>
     <button id="start" title="Start mechanizmu – 205 p.n.e. (S)">205 p.n.e.</button>
+  </div>
+  <div class="row">
+    <button id="sky-toggle" aria-pressed="false" aria-controls="sky" title="Odczyt kół obok efemerydy (N)">Mechanizm a niebo</button>
+    <select id="preset" aria-label="Daty z powieści „Odczyt”" title="Daty z powieści „Odczyt”">
+      <option value="">Daty z „Odczytu”…</option>
+    </select>
   </div>
 </footer>
 

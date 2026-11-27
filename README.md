@@ -8,8 +8,9 @@ Działający model greckiego kalkulatora astronomicznego z II/I wieku p.n.e. Kr�
 - **Tył:** spirala Metona (235 miesięcy w 5 zwojach) z tarczami Kalipposa i igrzysk; spirala sarosu (223 miesiące w 4 zwojach) z glifami zaćmień i tarczą exeligmos; wskazówki ze ślizgaczem, który przechodzi na kolejny zwój.
 - **Wnętrze:** rozsunięty schemat 35 kół (korba a1, b1…i1 oraz tor księżycowy e5, k1, k2, e6, e1, b3) obracających się razem z korbą. Na platformie e3 widać kołek k1 w szczelinie k2; dotknięcie e3 (albo klawisz `Z`) powiększa platformę i pokazuje, o ile k2 wyprzedza k1 albo zostaje za nim. Pod schematem jest lista przekładni planetarnych i toru księżycowego.
 - **Co to jest?:** krótki opis znaleziska i źródeł.
+- **Mechanizm a niebo** (przycisk pod suwakiem albo klawisz `N`): dla wybranego dnia pokazuje nów, kwadrę albo pełnię na niebie i ten sam moment na mechanizmie oraz rozjazd w dniach i godzinach. Lista „Daty z »Odczytu«” ustawia daty z powieści. Szczegóły w części „Mechanizm a niebo”.
 
-Skróty klawiszowe: `1`/`2`/`3`/`4` — widoki; `←`/`→` — dzień; `↑`/`↓` — miesiąc; `PageUp`/`PageDown` — rok; spacja — start/stop; `T` — dzisiaj; `S` — start w 205 p.n.e.; `D` — tryb jasny/ciemny; `Z` — w widoku „Wnętrze” powiększenie platformy e3. Działa offline po pierwszym wczytaniu (service worker). Po wdrożeniu nowej wersji pierwsze otwarcie strony pokazuje jeszcze wersję z pamięci podręcznej; gdy nowa wersja się zainstaluje, u góry pojawia się pasek „Jest nowa wersja, odśwież.” — przycisk „Odśwież” aktywuje nowy service worker (`skipWaiting`) i przeładowuje stronę. Sprawdzone na produkcji w Chromie przy przejściu v8→v10: pierwsze wejście bez paska (stara strona nie ma jego kodu), drugie z paskiem, kliknięcie przeładowało stronę, pasek zniknął, w pamięci podręcznej zostało tylko `antykithira-v10`. Od v9 wzwyż pasek pojawia się już przy pierwszym otwarciu po wdrożeniu (sprawdzone lokalnie na symulowanych wdrożeniach).
+Skróty klawiszowe: `1`/`2`/`3`/`4` — widoki; `N` — mechanizm a niebo; `←`/`→` — dzień; `↑`/`↓` — miesiąc; `PageUp`/`PageDown` — rok; spacja — start/stop; `T` — dzisiaj; `S` — start w 205 p.n.e.; `D` — tryb jasny/ciemny; `Z` — w widoku „Wnętrze” powiększenie platformy e3. Działa offline po pierwszym wczytaniu (service worker). Po wdrożeniu nowej wersji pierwsze otwarcie strony pokazuje jeszcze wersję z pamięci podręcznej; gdy nowa wersja się zainstaluje, u góry pojawia się pasek „Jest nowa wersja, odśwież.” — przycisk „Odśwież” aktywuje nowy service worker (`skipWaiting`) i przeładowuje stronę. Sprawdzone na produkcji w Chromie przy przejściu v8→v10: pierwsze wejście bez paska (stara strona nie ma jego kodu), drugie z paskiem, kliknięcie przeładowało stronę, pasek zniknął, w pamięci podręcznej zostało tylko `antykithira-v10`. Od v9 wzwyż pasek pojawia się już przy pierwszym otwarciu po wdrożeniu (sprawdzone lokalnie na symulowanych wdrożeniach).
 
 ## Uruchomienie i test
 
@@ -19,7 +20,7 @@ To czysty HTML, CSS i JavaScript z Canvas 2D, bez bibliotek i bez kroku budowani
 node test.js
 ```
 
-Test sprawdza na ułamkach dokładnych, że liczby zębów dają 254/19 (Księżyc gwiazdowy), 5/19 (Meton), 1/76 (Kalippos), 1/4 (igrzyska), 4 obroty na 223 miesiące (saros), 1/12 sarosu (exeligmos) i okresy planet z artykułu Freetha. Dla toru księżycowego sprawdza, że b3 daje średnio dokładnie 254/19, a k1 względem e3 obraca się z okresem anomalii 1/(254/19 − 477/4237) roku. Sprawdza też, że największe odchylenie wynosi arcsin(0,11) ≈ 6,32° i że kinematyka zgadza się z epicyklem Hipparcha; wypisuje różnicę wobec dawnego wzoru. Kontroluje też, że po 223 miesiącach wskazówka sarosu i ślizgacz wracają do startu, a po 235 miesiącach — wskazówka Metona. Do tego dochodzą powroty Kalipposa, igrzysk i planet, kalendarze oraz wykrywanie znanych zaćmień z lat 2022 i 2024. Test sprawdza też epoki tarcz tylnych (saros 28 IV, kalendarz 23 VIII 205 p.n.e.), początek cyklu exeligmos na godzinie 1 i położenia planet w epoce względem JPL DE441 (`test-dane/de441-205pne.json`).
+Test sprawdza na ułamkach dokładnych, że liczby zębów dają 254/19 (Księżyc gwiazdowy), 5/19 (Meton), 1/76 (Kalippos), 1/4 (igrzyska), 4 obroty na 223 miesiące (saros), 1/12 sarosu (exeligmos) i okresy planet z artykułu Freetha. Dla toru księżycowego sprawdza, że b3 daje średnio dokładnie 254/19, a k1 względem e3 obraca się z okresem anomalii 1/(254/19 − 477/4237) roku. Sprawdza też, że największe odchylenie wynosi arcsin(0,11) ≈ 6,32° i że kinematyka zgadza się z epicyklem Hipparcha; wypisuje różnicę wobec dawnego wzoru. Kontroluje też, że po 223 miesiącach wskazówka sarosu i ślizgacz wracają do startu, a po 235 miesiącach — wskazówka Metona. Do tego dochodzą powroty Kalipposa, igrzysk i planet, kalendarze oraz wykrywanie znanych zaćmień z lat 2022 i 2024. Test sprawdza też epoki tarcz tylnych (saros 28 IV, kalendarz 23 VIII 205 p.n.e.), początek cyklu exeligmos na godzinie 1 i położenia planet w epoce względem JPL DE441 (`test-dane/de441-205pne.json`). Sekcja 6 porównuje czasy nowiów, kwadr i pełni z niezależnie policzonymi czasami z DE421, a sekcja 7 sprawdza, jak liczby zębów b1 i e5 wpływają na przełożenia.
 
 ## Pliki
 
@@ -147,6 +148,23 @@ Co z tego wynika, a co nie:
 - Nowy model kinematyczny różni się od dawnego wzoru `pinSlot` (już usuniętego z silnika) najwyżej o 0,693° w jednym cyklu sarosu (test wypisuje tę liczbę). To nie jest błąd rachunku. Kołek w szczelinie daje dokładnie atan2(e·sin M, 1 − e·cos M) przy anomalii M liczonej od perygeum, czyli epicykl Hipparcha (Freeth 2006, SI „Geometric Proof”). Dawny wzór miał w mianowniku 1 + e·cos M. Pierwszy składnik (e·sin M) obu wzorów jest ten sam, a drugi (e²/2·sin 2M) ma przeciwne znaki, więc różnica dochodzi do e² ≈ 0,0121 rad ≈ 0,69°. Poprawny jest znak z kół: Księżyc przy perygeum przyspiesza bardziej, niż zwalnia przy apogeum. Taki sam znak ma drugi wyraz rzeczywistej nierówności (+0,214° sin 2M′ u Meeusa, z pamięci, niesprawdzone).
 - Kalibracja startowa się nie zmieniła: te same stałe `CAL.moonL` i `CAL.moonM` z Meeusa. Z powodu tej różnicy pozycja Księżyca w chwili startu przesunęła się o 0,53° (z 29,59° na 29,05° długości).
 
+## Mechanizm a niebo
+
+Przełącznik pokazuje dla wybranego dnia to samo zjawisko (nów, I kwadrę, pełnię albo III kwadrę) dwa razy. Po stronie nieba czas zjawiska liczę według Meeusa (rozdz. 49, prawdziwe fazy z poprawkami) i zamieniam czas ziemski na UT przez ΔT. Po stronie mechanizmu szukam chwili, w której kulka fazy pokazuje ten sam kąt (0°, 90°, 180°, 270°) w tej samej lunacji, czyli w n-tym miesiącu od epoki sarosu. Różnica obu czasów to rozjazd w dniach i godzinach.
+
+Rozjazd to dryf cyklu Metona, a nie błąd modelu. Mechanizm liczy miesiąc jako 19 lat (po 365¼ dnia) przez 235, czyli 29,53085 dnia. Rzeczywisty średni miesiąc synodyczny jest krótszy o około 22,65 s, więc mechanizm zostaje w tyle o tę wielkość z każdym miesiącem. W 2027 roku, po około 27 600 miesiącach od 205 p.n.e., daje to około 7 dni i 6 godzin. Panel rozkłada rozjazd na dryf Metona i resztę, która wynika z uproszczonej nierówności Księżyca i Słońca w mechanizmie (najwyżej kilka godzin). Przy nowiu i pełni panel pokazuje też, czy na niebie było zaćmienie (Meeus, rozdz. 54) i czy komórka sarosu tej samej lunacji ma glif. Po 2200 latach wzór glifów nie pasuje już do nieba, bo serie sarosowe się zmieniają.
+
+Sprawdzenie: sekcja 6 testu porównuje czasy z dwunastoma zjawiskami z lat 1941 i 2027 (DE421) oraz 168 i 136 p.n.e. (ephem z ΔT Morrisona i Stephensona). Różnica wynosi najwyżej 0,4 min dla dat nowożytnych i 1,1 min dla antycznych. Współczynniki Meeusa i ΔT (Espenak i Meeus 2006 dla −500…1600, tabela dla 1600–2025, parabola Morrisona i Stephensona 2004 poza tym) wpisałem z pamięci; test potwierdza je wynikiem, nie pochodzeniem. W starożytności sama niepewność ΔT to rząd pół godziny, więc godziny przed naszą erą są przybliżone.
+
+Daty w liście pochodzą z powieści „Odczyt”: lista podaje tylko numer nocy, zjawisko i dzień.
+
+## Zęby b1 i e5 a przełożenia
+
+Sprawdziłem w materiałach uzupełniających Freeth i in. 2006 (Supplementary Notes 3, tabela liczb zębów na s. 15 i rozdział „The Gear Trains” na s. 20–27, plik nature05357-s1.pdf), czy dwie rozbieżności z tomografią zmieniają wskazania tarcz.
+
+- **b1: model 224, CT 223** (granice 223/224; Wright 223, Price 225; SI s. 15). Koło b1 zazębia się tylko z korbą a1. Wszystkie tarcze są napędzane z b2, które jest przymocowane do b1 („b2 is fixed to b1 and hence the rest of the Mechanism”, SI s. 20), a jeden obrót b1 to z definicji rok. Liczba zębów b1 nie wchodzi więc do żadnego przełożenia wyjściowego, zmienia tylko liczbę obrotów korby na rok: 224/48 ≈ 4,667 zamiast 223/48 ≈ 4,646. Wartość zostaje, a test w sekcji 7 sprawdza, że b1 łączy się tylko z a1.
+- **e5: model 50, CT 52** (granice 50–52; Wright 51; SI s. 15). Tu liczba zębów wchodzi do przełożenia. Względem platformy e3 okres anomalii zależy od e5/k1, a średni ruch Księżyca od (e5·k2)/(k1·e6). Przy e5 = 52 i k1 = k2 = e6 = 50 Księżyc średni byłby o 190,9° na rok za szybki, a miesiąc anomalistyczny trwałby 26,49 dnia zamiast 27,55. Wartość Freetha to jednak 50: tekst SI na s. 24 mówi „e5 and k1 both have 50 teeth”, na s. 25 „k2 and e6 have the same number of teeth”, a cały wywód o anomalii (s. 23–26) opiera się na tych równościach. Odczyt CT 52 to pomiar zębów na skorodowanym kole, a nie wartość przyjęta przez autorów. Model zostaje przy 50, a test w sekcji 7 liczy, co dałoby 52.
+
 ## Źródła
 
 - D. de Solla Price, *Gears from the Greeks*, Trans. Am. Philos. Soc. 64 (1974).
@@ -159,7 +177,8 @@ Co z tego wynika, a co nie:
 - P. Iversen, *The Calendar on the Antikythera Mechanism and the Corinthian Family of Calendars*, Hesperia 86 (2017), s. 129–203.
 - C. C. Carman, *The Final Date of the Antikythera Mechanism*, Journal for the History of Astronomy 48 (2017), s. 312–323 (czytane tylko streszczenie).
 - A. Jones, *The Epoch Dates of the Antikythera Mechanism (With an Appendix on its Authenticity)*, ISAW Papers 17 (2020), http://dlib.nyu.edu/awdl/isaw/isaw-papers/17/
-- J. Meeus, *Astronomical Algorithms*, 2. wyd. (1998).
+- J. Meeus, *Astronomical Algorithms*, 2. wyd. (1998), rozdz. 49 (fazy Księżyca) i 54 (zaćmienia).
+- F. Espenak, J. Meeus, *Polynomial expressions for Delta T* (NASA, 2006); L. V. Morrison, F. R. Stephenson, *Historical values of the Earth's clock error ΔT*, J. Hist. Astron. 35 (2004).
 - JPL Horizons, efemeryda DE441 (R. S. Park i in., Astron. J. 161:105, 2021), https://ssd.jpl.nasa.gov/horizons/
 
 Strona działa pod `/antykithira/`, więc wszystkie ścieżki są względne. Plik `.nojekyll` wyłącza przetwarzanie przez Jekyll. GitHub Pages trzeba włączyć w ustawieniach repozytorium (gałąź `main`, katalog główny).

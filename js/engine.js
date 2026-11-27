@@ -288,6 +288,99 @@
     const umbral = (1.0128 - u - Math.abs(gamma)) / 0.5450;   // wielkość cieniowa
     return umbral > 0 ? { type: 'L', gamma, mag: umbral } : null;
   }
+  // ---------- niebo: prawdziwe fazy Księżyca (Meeus, rozdz. 49) i ΔT ----------
+  // q = 0 nów, 0,25 I kwadra, 0,5 pełnia, 0,75 III kwadra; zwraca JDE (czas ziemski TT).
+  // Współczynniki wpisane z „Astronomical Algorithms” z pamięci; test porównuje wynik z DE421
+  // (tabela presetów) – zgodność do kilku minut dla 1941 i 2027.
+  function truePhase(k, q) {
+    const kk = k + q, T = kk / 1236.85, T2 = T * T, T3 = T2 * T, T4 = T3 * T;
+    let jde = 2451550.09766 + 29.530588861 * kk + 0.00015437 * T2 - 0.000000150 * T3 + 0.00000000073 * T4;
+    const E = 1 - 0.002516 * T - 0.0000074 * T2, E2 = E * E;
+    const M = (2.5534 + 29.10535670 * kk - 0.0000014 * T2 - 0.00000011 * T3) * rad;
+    const Mp = (201.5643 + 385.81693528 * kk + 0.0107582 * T2 + 0.00001238 * T3 - 0.000000058 * T4) * rad;
+    const Fa = (160.7108 + 390.67050284 * kk - 0.0016118 * T2 - 0.00000227 * T3 + 0.000000011 * T4) * rad;
+    const Om = (124.7746 - 1.56375588 * kk + 0.0020672 * T2 + 0.00000215 * T3) * rad;
+    const sin = Math.sin, cos = Math.cos;
+    let c;
+    if (q === 0 || q === 0.5) {
+      const n = q === 0;
+      c = (n ? -0.40720 : -0.40614) * sin(Mp) + (n ? 0.17241 : 0.17302) * E * sin(M) + (n ? 0.01608 : 0.01614) * sin(2 * Mp)
+        + (n ? 0.01039 : 0.01043) * sin(2 * Fa) + (n ? 0.00739 : 0.00734) * E * sin(Mp - M) - (n ? 0.00514 : 0.00515) * E * sin(Mp + M)
+        + (n ? 0.00208 : 0.00209) * E2 * sin(2 * M) - 0.00111 * sin(Mp - 2 * Fa) - 0.00057 * sin(Mp + 2 * Fa)
+        + 0.00056 * E * sin(2 * Mp + M) - 0.00042 * sin(3 * Mp) + 0.00042 * E * sin(M + 2 * Fa) + 0.00038 * E * sin(M - 2 * Fa)
+        - 0.00024 * E * sin(2 * Mp - M) - 0.00017 * sin(Om) - 0.00007 * sin(Mp + 2 * M) + 0.00004 * sin(2 * Mp - 2 * Fa)
+        + 0.00004 * sin(3 * M) + 0.00003 * sin(Mp + M - 2 * Fa) + 0.00003 * sin(2 * Mp + 2 * Fa) - 0.00003 * sin(Mp + M + 2 * Fa)
+        + 0.00003 * sin(Mp - M + 2 * Fa) - 0.00002 * sin(Mp - M - 2 * Fa) - 0.00002 * sin(3 * Mp + M) + 0.00002 * sin(4 * Mp);
+    } else {
+      c = -0.62801 * sin(Mp) + 0.17172 * E * sin(M) - 0.01183 * E * sin(Mp + M) + 0.00862 * sin(2 * Mp) + 0.00804 * sin(2 * Fa)
+        + 0.00454 * E * sin(Mp - M) + 0.00204 * E2 * sin(2 * M) - 0.00180 * sin(Mp - 2 * Fa) - 0.00070 * sin(Mp + 2 * Fa)
+        - 0.00040 * sin(3 * Mp) - 0.00034 * E * sin(2 * Mp - M) + 0.00032 * E * sin(M + 2 * Fa) + 0.00032 * E * sin(M - 2 * Fa)
+        - 0.00028 * E2 * sin(Mp + 2 * M) + 0.00027 * E * sin(2 * Mp + M) - 0.00017 * sin(Om) - 0.00005 * sin(Mp - M - 2 * Fa)
+        + 0.00004 * sin(2 * Mp + 2 * Fa) - 0.00004 * sin(Mp + M + 2 * Fa) + 0.00004 * sin(Mp - 2 * M) + 0.00003 * sin(Mp + M - 2 * Fa)
+        + 0.00003 * sin(3 * M) + 0.00002 * sin(2 * Mp - 2 * Fa) + 0.00002 * sin(Mp - M + 2 * Fa) - 0.00002 * sin(3 * Mp + M);
+      const W = 0.00306 - 0.00038 * E * cos(M) + 0.00026 * cos(Mp) - 0.00002 * cos(Mp - M) + 0.00002 * cos(Mp + M) + 0.00002 * cos(2 * Fa);
+      c += q === 0.25 ? W : -W;
+    }
+    const A = [[299.77, 0.107408, 0.000325], [251.88, 0.016321, 0.000165], [251.83, 26.651886, 0.000164], [349.42, 36.412478, 0.000126],
+      [84.66, 18.206239, 0.000110], [141.74, 53.303771, 0.000062], [207.14, 2.453732, 0.000060], [154.84, 7.306860, 0.000056],
+      [34.52, 27.261239, 0.000047], [207.19, 0.121824, 0.000042], [291.34, 1.844379, 0.000040], [161.72, 24.198154, 0.000037],
+      [239.56, 25.513099, 0.000035], [331.55, 3.592518, 0.000023]];
+    let pl = 0;
+    A.forEach(([a0, a1, amp], i) => { pl += amp * sin((a0 + a1 * kk - (i === 0 ? 0.009173 * T2 : 0)) * rad); });
+    return jde + c + pl;
+  }
+  // ΔT = TT − UT [s]. Espenak i Meeus (NASA, 2006) dla −500…1600, tabela 1600–2025 i parabola
+  // Morrisona i Stephensona (2004) poza tym zakresem. Współczynniki z pamięci; w starożytności
+  // niepewność ΔT to rząd pół godziny, więc godziny przed n.e. są przybliżone.
+  const DT_TAB = [[1600, 120], [1700, 9], [1800, 14], [1850, 7], [1900, -3], [1950, 29], [1970, 40], [1990, 57], [2000, 64], [2010, 66], [2020, 69], [2025, 69]];
+  function deltaT(y) {
+    const par = (yy) => -20 + 32 * ((yy - 1820) / 100) ** 2;
+    if (y < -500) return par(y);
+    if (y < 500) { const u = y / 100; return 10583.6 - 1014.41 * u + 33.78311 * u ** 2 - 5.952053 * u ** 3 - 0.1798452 * u ** 4 + 0.022174192 * u ** 5 + 0.0090316521 * u ** 6; }
+    if (y < 1600) { const u = (y - 1000) / 100; return 1574.2 - 556.01 * u + 71.23472 * u ** 2 + 0.319781 * u ** 3 - 0.8503463 * u ** 4 - 0.005050998 * u ** 5 + 0.0083572073 * u ** 6; }
+    if (y <= 2025) {
+      let i = 0; while (DT_TAB[i + 1][0] < y) i++;
+      const [y0, d0] = DT_TAB[i], [y1, d1] = DT_TAB[i + 1];
+      return d0 + (d1 - d0) * (y - y0) / (y1 - y0);
+    }
+    if (y < 2150) return 69 + (par(2150) - 69) * (y - 2025) / 125;   // łagodne przejście do paraboli
+    return par(y);
+  }
+  const PHASE_Q = { new: 0, first: 0.25, full: 0.5, last: 0.75 };
+  const PHASE_PL = { new: 'nów', first: 'I kwadra', full: 'pełnia', last: 'III kwadra' };
+  const PHASE_DEG = { new: 0, first: 90, full: 180, last: 270 };
+  /*
+   * Mechanizm a niebo: to samo zjawisko (nów, kwadra, pełnia) w tej samej lunacji, raz na niebie
+   * (Meeus + ΔT, czas UT), raz na mechanizmie (chwila, w której kulka fazy pokazuje ten kąt).
+   * Lunacje są liczone tak samo po obu stronach (n-ty nów od epoki sarosu), więc różnica to
+   * nagromadzony dryf: miesiąc mechanizmu (19 lat = 235 miesięcy, rok 365¼ d) jest dłuższy od
+   * rzeczywistego o MONTH − SYN_TRUE ≈ 22,65 s; reszta to uproszczone nierówności Księżyca i Słońca.
+   */
+  function skyVsMechanism(jd, kind) {
+    const q = PHASE_Q[kind];
+    const k = Math.round((jd - LUN0) / SYN_TRUE - q);
+    const jdeSky = truePhase(k, q);
+    const ySky = calFromJd(jdeSky, false).y;
+    const jdSky = jdeSky - deltaT(ySky) / 86400;
+    const n = k - K_START;                                  // numer lunacji od epoki sarosu
+    const target = PHASE_DEG[kind];
+    let x = JD_START + (n + q) * MONTH;                     // średnie zjawisko mechanizmu
+    for (let i = 0; i < 40; i++) {                          // kulka fazy: phase(x) = target; stały krok 360°/miesiąc
+      const f = (((state(x).phase - target) % 360) + 540) % 360 - 180;
+      if (Math.abs(f) < 1e-7) break;
+      x -= f * MONTH / 360;
+    }
+    const meton = (n + q) * (MONTH - SYN_TRUE);
+    let ecl = null;
+    if (q === 0 || q === 0.5) {
+      const sky = eclipseAt(q === 0 ? k : k + 0.5);
+      const cell = ((((q === 0 ? n - 1 : n) % 223) + 223) % 223);
+      const g = SAROS_GLYPHS[cell];
+      ecl = { sky: sky ? sky.type : null, glyph: q === 0 ? (g.solar ? 'Η' : null) : (g.lunar ? 'Σ' : null), cell };
+    }
+    return { kind, name: PHASE_PL[kind], k, n, jdSky, jdeSky, deltaT: deltaT(ySky), jdMech: x, diff: x - jdSky, meton, ecl };
+  }
+
   // ---------- glify sarosu ----------
   // Rozkład: „Eclipse Year Model” (Freeth 2014, PLOS ONE 9:e103275). Miesiąc = 38 EYu, rok zaćmieniowy = 446 EYu;
   // pełnia n-tego miesiąca w 38(n−1)+17, nów w 38(n−1)+36 (mod 446); punkty węzłowe: zstępujący 66, wstępujący 289.
@@ -391,6 +484,6 @@
     R_SIDEREAL, R_APSIDES, R_ANOMALY, R_SYNODIC,
     jdFromCal, calFromJd, egyptian, EG_MONTHS, EG_MONTHS_PL, EG_EPOCH,
     JD_START, K_START, JD_METON, K_METON, METON_OFFSET, EXELIGMOS_START, EXELIGMOS_SECTORS, meanNewMoon, kNear, eclipseAt, SAROS_GLYPHS, OBSERVED_GLYPHS, METONIC_CELLS, EXCLUDED, GAMES, GAMES_PL, GAMES_UNCERTAIN,
-    state, jdNow, slotAngle, lunarTrain, E_MOON, R_PIN, D_K, E_SUN, norm, relRate
+    state, jdNow, truePhase, deltaT, skyVsMechanism, PHASE_PL, slotAngle, lunarTrain, E_MOON, R_PIN, D_K, E_SUN, norm, relRate
   };
 });

@@ -210,5 +210,47 @@ for (const p of AM.PLANETS) {
   ok(Math.abs(dl) < lim, `${p.id}: długość geocentryczna, model − DE441 = ${dl.toFixed(2)}° (granica ${lim.toFixed(1)}° z mimośrodów)`);
 }
 
+console.log('6. Mechanizm a niebo (fazy Meeusa wobec DE421; daty z presetów)');
+{
+  // Czasy UT z efemerydy JPL DE421 (1941, 2027) i z ephem z ΔT Morrisona–Stephensona (daty antyczne),
+  // policzone niezależnie od tego silnika. Rok astronomiczny (−167 = 168 p.n.e.); p.n.e. juliański, n.e. gregoriański.
+  const REF = [[2027, 6, 4, 'new', '19:40:21'], [2027, 6, 11, 'first', '10:56:08'], [2027, 6, 19, 'full', '00:44:21'],
+    [2027, 7, 4, 'new', '03:02:05'], [2027, 7, 10, 'first', '18:39:01'], [2027, 7, 18, 'full', '15:44:55'],
+    [2027, 7, 26, 'last', '16:54:55'], [2027, 8, 2, 'new', '10:05:14'], [1941, 4, 26, 'new', '13:23'],
+    [-167, 6, 21, 'full', '18:32'], [-135, 4, 8, 'last', '15:20'], [-135, 8, 11, 'new', '01:50']];
+  let worstM = 0, worstA = 0;
+  for (const [y, m, d, kind, ut] of REF) {
+    const g = y >= 1582, [h, mi, se] = ut.split(':').map(Number);
+    const ref = AM.jdFromCal(y, m, d + (h + mi / 60 + (se || 0) / 3600) / 24, g);
+    const r = AM.skyVsMechanism(AM.jdFromCal(y, m, d + 0.5, g), kind);
+    const e = Math.abs(r.jdSky - ref) * 1440;
+    if (y > 0) worstM = Math.max(worstM, e); else worstA = Math.max(worstA, e);
+  }
+  ok(worstM < 2, `nowie, kwadry i pełnie 1941 i 2027: Meeus + ΔT − DE421 najwyżej ${worstM.toFixed(1)} min (< 2 min)`);
+  ok(worstA < 10, `daty antyczne: różnica najwyżej ${worstA.toFixed(1)} min (< 10 min; ΔT niepewne o rząd pół godziny)`);
+  const dm = (AM.MONTH - 29.530588861) * 86400;
+  ok(Math.abs(dm - 22.65) < 0.01, `miesiąc mechanizmu dłuższy od rzeczywistego o ${dm.toFixed(2)} s`);
+  const r27 = AM.skyVsMechanism(AM.jdFromCal(2027, 8, 2.4, true), 'new');
+  ok(Math.abs(AM.state(r27.jdMech).phase) < 1e-6 || Math.abs(AM.state(r27.jdMech).phase - 360) < 1e-6, 'w chwili „nowiu mechanizmu” kulka fazy stoi na 0°');
+  ok(r27.diff > 6.5 && r27.diff < 8 && Math.abs(r27.diff - r27.meton) < 0.5, `nów 2 VIII 2027: mechanizm spóźnia się o ${r27.diff.toFixed(2)} d, z czego dryf Metona ${r27.meton.toFixed(2)} d`);
+  ok(r27.ecl.sky === 'S', 'nów 2 VIII 2027: Meeus wykrywa zaćmienie Słońca');
+  const r0 = AM.skyVsMechanism(AM.JD_START + 1, 'new');
+  ok(r0.n === 0 && Math.abs(r0.meton) < 1e-9 && Math.abs(r0.diff) < 0.5, `w epoce rozjazd ${(r0.diff * 24).toFixed(1)} h, sam dryf Metona 0`);
+}
+
+console.log('7. Zęby b1 i e5 a przełożenia wyjściowe (Freeth 2006, SI s. 15 i 20–26)');
+{
+  // b1 zazębia się tylko z korbą a1; wszystkie tarcze są napędzane z b2 na wałku b1 (SI s. 20: „b2 is fixed to b1”).
+  const usesB1 = AM.GEARS.filter((g) => g.p === 'b1' && g.rel === 'mesh').map((g) => g.id);
+  ok(usesB1.join() === 'a1', 'z b1 zazębia się tylko a1 (korba), więc liczba zębów b1 nie wchodzi do żadnego przełożenia tarcz');
+  ok(eqF(absF(G.a1.rate), AM.F(G.b1.z, G.a1.z)), `b1 zmienia tylko obroty korby na rok: ${G.b1.z}/48 = ${(G.b1.z / 48).toFixed(3)} (przy 223: ${(223 / 48).toFixed(3)})`);
+  // e5: przy odczycie CT 52 (k1 = k2 = e6 = 50) tor przestaje działać
+  const wSi = 254 / 19, wn = 477 / 4237;
+  const mean = (e5, k1, k2, e6) => wn + (wSi - wn) * e5 * k2 / (k1 * e6);
+  const errDeg = (mean(52, 50, 50, 50) - wSi) * 360;
+  ok(Math.abs(errDeg - 190.9) < 0.1, `e5 = 52: Księżyc średni o ${errDeg.toFixed(1)}° na rok za szybko, okres anomalii ${(365.25 / ((wSi - wn) * 52 / 50)).toFixed(2)} d zamiast 27,55 d`);
+  ok(G.e5.z === 50 && G.k1.z === 50, 'model: e5 = k1 = 50, jak w tekście SI s. 24 („e5 and k1 both have 50 teeth”)');
+}
+
 console.log(`\n${pass} ok, ${fail} błędów`);
 process.exit(fail ? 1 : 0);

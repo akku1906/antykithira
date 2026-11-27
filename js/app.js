@@ -106,6 +106,7 @@
     else if (k === 't') setJd(AM.jdNow());
     else if (k === 's') setJd(AM.JD_START);
     else if (k === 'd') $('#theme').click();
+    else if (k === 'n') setSky(!skyOn);
     else if (k === 'z' && view === 'inside') { window.Views.inside.toggleZoom(); dirty = true; }
   });
 
@@ -140,6 +141,7 @@
       center = V.draw(ctx, W, H, st, palette) || { cx: W / 2, cy: H / 2 };
     }
     readout(st);
+    skyReadout();
     if (document.activeElement !== slider) slider.value = jd;
   }
   function loop(ts) {
@@ -184,16 +186,87 @@
       ['Saros', `miesiąc ${sa.cell + 1}/223, zwój ${sa.turn + 1}`],
       ['Glif', glTxt],
       ['Exeligmos', `+${st.exeligmos.sector * 8} h <span class="gr">(${st.exeligmos.sector + 1}/3)</span>`],
-      ['Korba', `${(st.t * 224 / 48).toFixed(1)} obr. od startu`],
+      ['Korba', `${(st.t * AM.G.b1.z / AM.G.a1.z).toFixed(1)} obr. od startu`],
       ['Dryf', `Słońce ${st.drift.sun >= 0 ? '+' : ''}${st.drift.sun.toFixed(1)}°, Księżyc ${st.drift.moon >= 0 ? '+' : ''}${st.drift.moon.toFixed(1)}° <span class="gr">względem współczesnych średnich położeń</span>`]
     ];
     $('#readout').innerHTML = rows.map((r) => r.length === 1 ? r[0] : `<dt>${r[0]}</dt><dd>${r[1]}</dd>`).join('');
   }
 
+  // ---------- mechanizm a niebo ----------
+  // Daty z powieści „Odczyt” (tylko noc, zjawisko i dzień; czasy UT według tabeli z DE421 i ephem).
+  // Rok astronomiczny: −167 = 168 p.n.e., −135 = 136 p.n.e. (kalendarz juliański); n.e. gregoriański.
+  const PRESETS = [
+    ['Noc 8', 'new', 2027, 6, 4, 19.67], ['Noc 15', 'first', 2027, 6, 11, 10.94], ['Noc 22', 'full', 2027, 6, 19, 0.74],
+    ['Noce 37–38', 'new', 2027, 7, 4, 3.03], ['Noc 44', 'first', 2027, 7, 10, 18.65], ['Noce 51–52', 'full', 2027, 7, 18, 15.75],
+    ['Noc 60', 'last', 2027, 7, 26, 16.92], ['Noc 66', 'new', 2027, 8, 2, 10.09], ['Noc 43', 'new', 1941, 4, 26, 13.38],
+    ['Noc 20', 'full', -167, 6, 21, 18.53], ['Noce 25 i 36', 'new', -135, 4, 15, 5.38], ['Noc 44', 'last', -135, 4, 8, 15.33],
+    ['Noc 35', 'new', -135, 8, 11, 1.83]
+  ].map(([label, kind, y, m, d, h]) => ({ label, kind, y, jd: AM.jdFromCal(y, m, d + h / 24, y >= 1582) }));
+  const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
+  const presetSel = $('#preset');
+  PRESETS.forEach((p, i) => {
+    const c = AM.calFromJd(p.jd, p.y >= 1582);
+    const o = document.createElement('option');
+    o.value = String(i); o.textContent = `${p.label} · ${AM.PHASE_PL[p.kind]} ${c.d} ${ROMAN[c.m - 1]} ${yearStr(c.y)}`;
+    presetSel.appendChild(o);
+  });
+  let skyOn = false, skyKind = null, lastSky = null;
+  function setSky(on) {
+    skyOn = on; $('#sky').hidden = !on;
+    $('#sky-toggle').setAttribute('aria-pressed', String(on));
+    store.set('am-sky', on ? '1' : '0'); dirty = true;
+  }
+  $('#sky-toggle').addEventListener('click', () => setSky(!skyOn));
+  presetSel.addEventListener('change', () => {
+    const p = PRESETS[parseInt(presetSel.value, 10)];
+    if (!p) return;
+    skyKind = { kind: p.kind, jd: p.jd };
+    setSky(true); setJd(p.jd);
+  });
+  const pad = (x) => String(x).padStart(2, '0');
+  function whenStr(jdx) {
+    const jr = Math.round((jdx + 0.5) * 1440) / 1440 - 0.5;      // zaokrąglenie do minuty
+    const greg = AM.calFromJd(jr, false).y >= 1582;
+    const c = AM.calFromJd(jr, greg), mins = Math.round(c.frac * 1440);
+    return `${c.d} ${ROMAN[c.m - 1]} ${yearStr(c.y)}, ${pad(Math.floor(mins / 60))}:${pad(mins % 60)} UT`;
+  }
+  function dhStr(days) {
+    const h = Math.round(Math.abs(days) * 24), d = Math.floor(h / 24);
+    return d ? `${d} d ${h % 24} h` : `${h} h`;
+  }
+  function skyReadout() {
+    if (!skyOn) return;
+    // zjawisko: z presetu (dopóki nie przesunięto czasu o ponad 2 dni), inaczej najbliższe na niebie
+    if (skyKind && Math.abs(jd - skyKind.jd) > 2) skyKind = null;
+    let r;
+    if (skyKind) r = AM.skyVsMechanism(jd, skyKind.kind);
+    else r = ['new', 'first', 'full', 'last'].map((k) => AM.skyVsMechanism(jd, k)).sort((a, b) => Math.abs(a.jdSky - jd) - Math.abs(b.jdSky - jd))[0];
+    lastSky = r;
+    const later = r.diff >= 0;
+    const rest = r.diff - r.meton;
+    const rows = [
+      ['Niebo', `${r.name} ${whenStr(r.jdSky)} <button class="jump" data-jd="${r.jdSky}">pokaż</button><br><span class="gr">Meeus, rozdz. 49; ΔT ${Math.abs(r.deltaT) >= 600 ? (r.deltaT / 3600).toFixed(1) + ' h' : Math.round(r.deltaT) + ' s'}</span>`],
+      ['Mechanizm', `${r.name} ${whenStr(r.jdMech)} <button class="jump" data-jd="${r.jdMech}">pokaż</button><br><span class="gr">kulka fazy na ${({ new: 0, first: 90, full: 180, last: 270 })[r.kind]}°</span>`],
+      ['Rozjazd', `<b>${dhStr(r.diff)}</b> <span class="gr">(mechanizm ${later ? 'spóźnia się' : 'wyprzedza niebo'})</span>`],
+      ['', `<span class="gr">dryf Metona ${r.meton >= 0 ? '+' : '−'}${dhStr(r.meton)}, uproszczone nierówności ${rest >= 0 ? '+' : '−'}${dhStr(rest)}</span>`]
+    ];
+    if (r.ecl) {
+      const sky = r.ecl.sky === 'S' ? 'zaćmienie Słońca' : r.ecl.sky === 'L' ? 'zaćmienie Księżyca' : 'brak zaćmienia';
+      const gl = r.ecl.glyph ? `glif ${r.ecl.glyph}` : 'brak glifu';
+      rows.push(['Zaćmienie', `niebo: ${sky}; saros: ${gl} <span class="gr">(komórka ${r.ecl.cell + 1}, ta sama lunacja)</span>`]);
+    }
+    $('#sky-out').innerHTML = rows.map((x) => `<dt>${x[0]}</dt><dd>${x[1]}</dd>`).join('');
+  }
+  $('#sky-out').addEventListener('click', (e) => {
+    const b = e.target.closest('.jump');
+    if (b && lastSky) { const t = parseFloat(b.dataset.jd); skyKind = { kind: lastSky.kind, jd: t }; setJd(t); }
+  });
+
   // ---------- start ----------
   const savedTheme = store.get('am-theme'); if (savedTheme) applyTheme(savedTheme); themeIcon();
   const savedView = store.get('am-view');
   setView(window.Views[savedView] || savedView === 'about' ? savedView : 'front');
+  if (store.get('am-sky') === '1') setSky(true);
   requestAnimationFrame(loop);
 
   // Service worker i pasek „Jest nowa wersja”: nowy SW czeka (waiting), dopóki użytkownik

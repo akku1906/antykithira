@@ -197,9 +197,9 @@
   // Rok astronomiczny: −167 = 168 p.n.e., −135 = 136 p.n.e. (kalendarz juliański); n.e. gregoriański.
   const PRESETS = [
     ['Noc 8', 'new', 2027, 6, 4, 19.67], ['Noc 15', 'first', 2027, 6, 11, 10.94], ['Noc 22', 'full', 2027, 6, 19, 0.74],
-    ['Noce 37–38', 'new', 2027, 7, 4, 3.03], ['Noc 44', 'first', 2027, 7, 10, 18.65], ['Noce 51–52', 'full', 2027, 7, 18, 15.75],
+    ['Noce 37–38', 'new', 2027, 7, 4, 3.03], ['Noc 44 (2027)', 'first', 2027, 7, 10, 18.65], ['Noce 51–52', 'full', 2027, 7, 18, 15.75],
     ['Noc 60', 'last', 2027, 7, 26, 16.92], ['Noc 66', 'new', 2027, 8, 2, 10.09], ['Noc 43', 'new', 1941, 4, 26, 13.38],
-    ['Noc 20', 'full', -167, 6, 21, 18.53], ['Noce 25 i 36', 'new', -135, 4, 15, 5.38], ['Noc 44', 'last', -135, 4, 8, 15.33],
+    ['Noc 20', 'full', -167, 6, 21, 18.53], ['Noce 25 i 36', 'new', -135, 4, 15, 5.38], ['Noc 44 (136 p.n.e.)', 'last', -135, 4, 8, 15.33],
     ['Noc 35', 'new', -135, 8, 11, 1.83]
   ].map(([label, kind, y, m, d, h]) => ({ label, kind, y, jd: AM.jdFromCal(y, m, d + h / 24, y >= 1582) }));
   const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
